@@ -1,3 +1,5 @@
+using System;
+
 public enum FootwearType
 {
     Casual,
@@ -13,6 +15,10 @@ public class Footwear : Item
     public Footwear(int id, string name, Size size, Gender gender, decimal price, int quantity, FootwearType footwearType)
         : base(id, name, size, gender, price, quantity)
     {
+        if (!Enum.IsDefined(typeof(FootwearType), footwearType))
+        {
+            throw new ArgumentException($"Invalid footwear type: {footwearType}", nameof(footwearType));
+        }
         this.footwearType = footwearType;
     }
 }
