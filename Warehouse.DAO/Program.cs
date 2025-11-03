@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 /// <summary>
 /// Generic DAO implementation for Straight approach that uses a data source to load and filter Items
@@ -15,7 +17,7 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     /// <param name="source">Data source to use for parsing Items</param>
     public ItemDao(ISource<T> source)
     {
-        this.source = source;
+        this.source = source ?? throw new ArgumentNullException(nameof(source));
     }
 
     /// <summary>
@@ -25,7 +27,9 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     /// <returns>List of matching Items</returns>
     public IList<T> Find(Predicate<T> predicate)
     {
-        throw new NotImplementedException();
+        if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+        // simple implementation: load everything and filter (fine for small CSV DB)
+        return FindAll().Where(i => predicate(i)).ToList();
     }
 
     /// <summary>
@@ -34,7 +38,43 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     /// <returns>List of all Items</returns>
     public IList<T> FindAll()
     {
-        throw new NotImplementedException();
+        return EnumerateAll().ToList();
+    }
+
+    private IEnumerable<T> EnumerateAll()
+    {
+        var path = GetPath();
+        using var sr = new StreamReader(path);
+        string line;
+        bool first = true;
+        int lineNumber = 0;
+
+        while ((line = sr.ReadLine()) != null)
+        {
+            lineNumber++;
+            if (first)
+            {
+                first = false;
+                // assume first line is header; always skip first line
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            T item;
+            try
+            {
+                item = source.Parse(line);
+            }
+            catch (Exception ex)
+            {
+                // per-line error handling: log and continue (do not bring entire import down for one bad row)
+                Console.Error.WriteLine($"[ItemDao] Failed to parse line {lineNumber} in '{path}': {ex.Message}");
+                continue;
+            }
+
+            yield return item;
+        }
     }
 
     /// <summary>
@@ -44,6 +84,16 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     /// <exception cref="DaoException">When file is not found</exception>
     private string GetPath()
     {
-        throw new NotImplementedException();
+        var path = source.FilePath();
+        if (string.IsNullOrWhiteSpace(path))
+            throw new DaoException("Source returned empty file path.");
+
+        if (!Path.IsPathRooted(path))
+            path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
+
+        if (!File.Exists(path))
+            throw new DaoException($"Data file not found: {path}");
+
+        return path;
     }
 }

@@ -1,0 +1,20 @@
+Id,Name,Size,Gender,Price,Quantity,Type
+1,T-Shirt,M,Unisex,19.99,100,Top
+2,Jeans,M,Men,49.99,75,Bottom
+3,Dress,S,Women,59.99,50,Fullbody
+4,Hoodie,L,Unisex,39.99,85,Outerwear
+5,Skirt,M,Women,29.99,60,Bottom
+6,Polo,XL,Men,24.99,70,Top
+7,Shorts,M,Unisex,22.99,90,Bottom
+8,Sweater,S,Women,44.99,45,Top
+9,Jacket,L,Men,79.99,40,Outerwear
+10,Tank Top,XS,Women,14.99,65,Top
+11,Cargo Pants,L,Men,54.99,55,Bottom
+12,Blouse,M,Women,34.99,80,Top
+13,Jumpsuit,S,Women,69.99,30,Fullbody
+14,Blazer,M,Unisex,89.99,40,Outerwear
+15,Leggings,S,Women,29.99,120,Bottom
+16,Baseball Cap,One Size,Unisex,19.99,150,Accessory
+17,Cardigan,L,Unisex,49.99,60,Top
+18,Romper,XS,Women,44.99,45,Fullbody
+19,Sweatpants,XL,Unisex,34.99,95,Bottom

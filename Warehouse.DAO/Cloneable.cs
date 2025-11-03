@@ -11,9 +11,9 @@ public static class CloneableExtensions
     /// <typeparam name="T">Type of the object to clone</typeparam>
     /// <param name="cloneable">Object to clone</param>
     /// <returns>Typed copy of the object</returns>
-    public static T Clone<T>(this ICloneable cloneable) where T : class
+    public static T TypedClone<T>(this ICloneable cloneable) where T : class
     {
-        return (T)cloneable.Clone();
+        return (T)((ICloneable)cloneable).Clone();
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ public static class CloneableExtensions
     /// <typeparam name="T">Type of Item in the source</typeparam>
     /// <param name="source">Source to clone</param>
     /// <returns>Typed copy of the source</returns>
-    public static ISource<T> CloneSource<T>(this ISource<T> source) where T : Item
+    public static ISource<T> TypedCloneSource<T>(this ISource<T> source) where T : Item
     {
         return (ISource<T>)((ICloneable)source).Clone();
     }

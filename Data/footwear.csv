@@ -1,0 +1,16 @@
+Id,Name,Size,Gender,Price,Quantity,type
+1,Classic Brown Loafers,42,Male,89.99,25,Formal
+2,Running Sneakers Blue,40,Unisex,79.99,50,Casual
+3,Wedding White Heels,38,Female,129.99,15,Special
+4,Black Oxford Shoes,43,Male,99.99,30,Formal
+5,Canvas Slip-ons,39,Unisex,49.99,45,Casual
+6,Evening Stilettos,37,Female,149.99,20,Special
+7,Leather Derby Shoes,44,Male,119.99,18,Formal
+8,Sport Sandals,41,Unisex,59.99,40,Casual
+9,Prom Glitter Pumps,36,Female,139.99,12,Special
+10,Business Brogues,45,Male,109.99,22,Formal
+11,Casual Moccasins,38,Unisex,69.99,35,Casual
+12,Ballet Wedding Flats,37,Female,89.99,28,Special
+13,Dress Boots,42,Male,159.99,15,Formal
+14,Beach Flip-flops,40,Unisex,29.99,60,Casual
+15,Party Platforms,39,Female,119.99,25,Special

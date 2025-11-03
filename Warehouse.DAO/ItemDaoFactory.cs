@@ -56,4 +56,14 @@ public class ItemDaoFactory : IItemDaoFactory
         var source = GetConfiguredSource<T>();
         return new ItemDao<T>(source);
     }
+
+    private ISource<T> GetConfiguredSource<T>() where T : Item
+    {
+        if (!configuredSources.TryGetValue(typeof(T), out var stored))
+            throw new InvalidOperationException($"No source configured for {typeof(T).Name}");
+
+        var source = (ISource<T>)stored;
+        // return a clone so caller can't mutate the stored prototype
+        return source.TypedCloneSource();
+    }
 }
