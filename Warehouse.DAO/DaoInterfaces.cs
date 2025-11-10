@@ -70,4 +70,5 @@ public interface ISource<out T> where T : Item
     /// <param name="line">CSV line to parse</param>
     /// <returns>Parsed Item object</returns>
     T Parse(string line);
+    bool IsInMemory { get; }
 }

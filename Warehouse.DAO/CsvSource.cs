@@ -14,6 +14,8 @@ public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
     /// </summary>
     private readonly string filePath;
 
+    public bool IsInMemory => false;
+
     /// <summary>
     /// Creates a new CSV source with the specified file name
     /// </summary>

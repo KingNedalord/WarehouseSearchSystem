@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- <ItemGroup>
-    <ProjectReference Include="..\Warehouse.Models\Warehouse.Models.csproj" />
-  </ItemGroup> -->
+  <ItemGroup>
+    <ProjectReference Include="Warehouse.Services\Warehouse.Services.csproj" />
+  </ItemGroup>
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>warehouse_search_system</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

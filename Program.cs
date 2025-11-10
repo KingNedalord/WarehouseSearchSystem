@@ -1,12 +1,7 @@
-﻿using System;
-
-namespace dotnetcore
+﻿internal class Program1
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+        System.Console.WriteLine("Warehouse Search System Services Module");
     }
 }

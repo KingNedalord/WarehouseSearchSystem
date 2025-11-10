@@ -1,15 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- <ItemGroup>
-    <ProjectReference Include="..\Warehouse.Models\Warehouse.Models.csproj" />
-  </ItemGroup> -->
-
   <ItemGroup>
+  <ProjectReference Include="..\Warehouse.Models\Warehouse.Models.csproj" />
     <ProjectReference Include="..\Warehouse.DAO\Warehouse.DAO.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

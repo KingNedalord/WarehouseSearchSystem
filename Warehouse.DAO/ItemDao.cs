@@ -40,6 +40,16 @@ public class ItemDao<T> : IItemDao<T> where T : Item
 
     private IEnumerable<T> EnumerateAll()
     {
+        if (source.IsInMemory && source is IEnumerable<T> enumerable)
+        {
+            foreach (var item in enumerable)
+            {
+                yield return item;
+            }
+            yield break;
+        }
+
+        // Otherwise, read from CSV
         var path = GetPath();
         using var sr = new StreamReader(path);
         string line;
@@ -52,7 +62,6 @@ public class ItemDao<T> : IItemDao<T> where T : Item
             if (first)
             {
                 first = false;
-                // assume first line is header; always skip first line
                 continue;
             }
 
@@ -65,7 +74,6 @@ public class ItemDao<T> : IItemDao<T> where T : Item
             }
             catch (Exception ex)
             {
-                // per-line error handling: log and continue (do not bring entire import down for one bad row)
                 Console.Error.WriteLine($"[ItemDao] Failed to parse line {lineNumber} in '{path}': {ex.Message}");
                 continue;
             }
