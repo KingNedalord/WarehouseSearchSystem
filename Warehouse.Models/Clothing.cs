@@ -1,4 +1,4 @@
-using System;
+namespace Warehouse.Models;
 
 public enum ClothingType
 {

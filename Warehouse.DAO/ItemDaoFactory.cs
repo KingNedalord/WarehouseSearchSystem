@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
-
 /// <summary>
 /// Factory class for creating and configuring DAO objects and data sources.
 /// Implements the Singleton pattern and IItemDaoFactory interface.
 /// </summary>
+using Warehouse.Models;
+namespace Warehouse.DAO;
+
 public class ItemDaoFactory : IItemDaoFactory
 {
     private static readonly ItemDaoFactory instance = new ItemDaoFactory();

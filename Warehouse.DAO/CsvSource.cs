@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Warehouse.Models;
 
+namespace Warehouse.DAO;
 /// <summary>
 /// Abstract base class for CSV-based data sources in Straight implementation
 /// </summary>
@@ -64,6 +64,7 @@ public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
     /// <returns>Array of values</returns>
     protected string[] GetSplitted(string line)
     {
+        // TODO : check if it works properly
         const string delimiter = ";";
         return line.Split(delimiter);
     }

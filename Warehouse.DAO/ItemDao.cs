@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
+﻿using Warehouse.Models;
+namespace Warehouse.DAO;
 /// <summary>
 /// Generic DAO implementation for Straight approach that uses a data source to load and filter Items
 /// </summary>

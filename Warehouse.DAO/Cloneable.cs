@@ -1,8 +1,11 @@
-using System;
+using Warehouse.Models;
 
 /// <summary>
 /// Extension methods for ICloneable to provide type-safe cloning
 /// </summary>
+
+namespace Warehouse.DAO;
+
 public static class CloneableExtensions
 {
     /// <summary>

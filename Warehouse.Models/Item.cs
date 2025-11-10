@@ -1,4 +1,4 @@
-using System;
+namespace Warehouse.Models;
 
 /// <summary>
 /// Abstract base class for all clothing in the system

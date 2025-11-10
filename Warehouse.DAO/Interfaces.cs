@@ -1,6 +1,6 @@
-using System;
-using System.Collections.Generic;
+using Warehouse.Models;
 
+namespace Warehouse.DAO;
 /// <summary>
 /// Interface for Data Access Objects that handle Item data operations
 /// </summary>

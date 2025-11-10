@@ -1,5 +1,4 @@
-using System;
-
+namespace Warehouse.DAO;
 /// <summary>
 /// Exception thrown when a data access operation fails in the DAO layer.
 /// </summary>
