@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- <ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Warehouse.Models\Warehouse.Models.csproj" />
-  </ItemGroup> -->
+  </ItemGroup>
 
   <PropertyGroup>
     <OutputType>Library</OutputType>

@@ -56,7 +56,8 @@ public class ItemDao<T> : IItemDao<T> where T : Item
         bool first = true;
         int lineNumber = 0;
 
-        while ((line = sr.ReadLine()) != null)
+        // ! after Readline to indicate we know it's not null, like saying "trust me, it's not null"
+        while ((line = sr.ReadLine()!) != null)
         {
             lineNumber++;
             if (first)
