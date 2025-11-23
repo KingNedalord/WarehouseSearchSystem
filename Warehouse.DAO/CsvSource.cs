@@ -59,17 +59,17 @@ public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
         return fields.ConvertAll(f => f.Trim()).ToArray();
     }
 
-    /// <summary>
-    /// Splits a CSV line by delimiter
-    /// </summary>
-    /// <param name="line">CSV line to split</param>
-    /// <returns>Array of values</returns>
-    protected string[] GetSplitted(string line)
-    {
-        // TODO : check if it works properly
-        const string delimiter = ";";
-        return line.Split(delimiter);
-    }
+    // /// <summary>
+    // /// Splits a CSV line by delimiter
+    // /// </summary>
+    // /// <param name="line">CSV line to split</param>
+    // /// <returns>Array of values</returns>
+    // protected string[] GetSplitted(string line)
+    // {
+    //     // TODO : check if it works properly
+    //     const string delimiter = ";";
+    //     return line.Split(delimiter);
+    // }
 
     /// <summary>
     /// Parses a CSV line into an Item object
@@ -88,8 +88,8 @@ public class ClothingCsvSource : AbstractCsvSource<Clothing>
     /// <summary>
     /// Creates a new ClothingCsvSource that reads from the specified file
     /// </summary>
-    /// <param name="csvFileName">Name of the CSV file</param>
-    public ClothingCsvSource(string csvFileName) : base(csvFileName) { }
+    /// <param name="clothingCsvPath">Name of the CSV file</param>
+    public ClothingCsvSource(string clothingCsvPath) : base(clothingCsvPath) { }
 
     /// <summary>
     /// Parses a CSV line into a Clothing object
@@ -132,8 +132,8 @@ public class FootwearCsvSource : AbstractCsvSource<Footwear>
     /// <summary>
     /// Creates a new FootwearCsvSource that reads from the specified file
     /// </summary>
-    /// <param name="filePath">Path to the CSV file</param>
-    public FootwearCsvSource(string filePath) : base(filePath) { }
+    /// <param name="footwearCsvPath">Path to the CSV file</param>
+    public FootwearCsvSource(string footwearCsvPath) : base(footwearCsvPath) { }
 
     /// <summary>
     /// Parses CSV line into Footwear object

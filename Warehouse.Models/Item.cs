@@ -21,9 +21,9 @@ public enum Size
 /// </summary>
 public enum Gender
 {
-    M,
-    F,
-    U
+    Male,
+    Female,
+    Unisex
 }
 public abstract class Item
 {

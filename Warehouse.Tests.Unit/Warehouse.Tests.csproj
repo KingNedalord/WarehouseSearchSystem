@@ -25,4 +25,11 @@
     <ProjectReference Include="..\Warehouse.DAO\Warehouse.DAO.csproj" />
   </ItemGroup>
 
+<ItemGroup>
+  <None Include="..\..\Data\**\*">
+    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
+  </None>
+</ItemGroup>
+
 </Project>

@@ -1,537 +1,257 @@
-﻿using Warehouse.DAO;
+using Warehouse.DAO;
 using Warehouse.Models;
 using Warehouse.Services;
 using Xunit;
-using System.Collections;
 
-namespace Warehouse.Tests.Unit;
+namespace Warehouse.Tests.Integration;
 
-public class TestServiceBuilder
+/// <summary>
+/// Builder for creating services that read from actual CSV files
+/// </summary>
+public class FileBasedServiceBuilder
 {
-    private List<Clothing> _clothing;
-    private List<Footwear> _footwear;
-
-    public TestServiceBuilder()
-    {
-        _clothing = new List<Clothing>();
-        _footwear = new List<Footwear>();
-    }
-
-    public TestServiceBuilder WithClothing(List<Clothing> clothing)
-    {
-        _clothing = clothing;
-        return this;
-    }
-
-    public TestServiceBuilder WithFootwear(List<Footwear> footwear)
-    {
-        _footwear = footwear;
-        return this;
-    }
-
-    public TestServiceBuilder WithDefaultClothing()
-    {
-        _clothing = TestDataFactory.CreateTestClothing();
-        return this;
-    }
-
-    public TestServiceBuilder WithDefaultFootwear()
-    {
-        _footwear = TestDataFactory.CreateTestFootwear();
-        return this;
-    }
-
     public ItemService Build()
     {
-        var clothingDao = new ItemDao<Clothing>(new InMemorySource<Clothing>(_clothing));
-        var footwearDao = new ItemDao<Footwear>(new InMemorySource<Footwear>(_footwear));
-        var daoFactory = new InMemoryDaoFactory(clothingDao, footwearDao);
+        var dataFolder = GetDataFolder();
+
+        var daoFactory = ItemDaoFactory.Instance;
+        daoFactory.ConfigureItemDao(new ItemDao<Clothing>(new ClothingCsvSource(Path.Combine(dataFolder, "clothing.csv"))));
+        daoFactory.ConfigureItemDao(new ItemDao<Footwear>(new FootwearCsvSource(Path.Combine(dataFolder, "footwear.csv"))));
+
         return new ItemService(daoFactory);
     }
 
-    /// <summary>
-    /// A test-specific in-memory data source for unit testing DAOs.
-    /// </summary>
-    public class InMemorySource<T> : ISource<T>, IEnumerable<T> where T : Item
-    {
-        private readonly IEnumerable<T> _data;
-        // private readonly bool _useInMemoryData;
-        // public bool UseInMemoryData { get { return _useInMemoryData; } }
-
-        public bool IsInMemory { get; }
-
-        public InMemorySource(IEnumerable<T>? data = null)
-        {
-            _data = data ?? new List<T>();
-            IsInMemory = data != null;
-        }
-        public IEnumerator<T> GetEnumerator() => _data.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        // Minimal implementations to satisfy the ISource contract
-        public void Init()
-        {
-            if (!IsInMemory && !File.Exists(FilePath()))
-            {
-                throw new FileNotFoundException($"CSV file not found at {FilePath()}");
-            }
-        }
-        public string FilePath() => Path.Combine(
-          AppDomain.CurrentDomain.BaseDirectory,
-          "Data",
-          typeof(T) == typeof(Clothing) ? "clothing.csv" : "footwear.csv");
-        public object Clone() => new InMemorySource<T>(_data);
-
-        public T Parse(string line)
-        {
-            if (string.IsNullOrWhiteSpace(line))
-                throw new ArgumentException("Line cannot be empty or whitespace.");
-
-            var columns = line.Split(',');
-            if (columns.Length < 7)
-                throw new FormatException($"Invalid CSV format: expected 7 columns, got {columns.Length}");
-
-            try
-            {
-                if (typeof(T) == typeof(Clothing))
-                {
-                    return (T)(object)new Clothing(
-                        id: int.Parse(columns[0]),
-                        name: columns[1],
-                        size: Enum.Parse<Size>(columns[2], true),
-                        gender: Enum.Parse<Gender>(columns[3], true),
-                        price: decimal.Parse(columns[4]),
-                        quantity: int.Parse(columns[5]),
-                        clothingType: Enum.Parse<ClothingType>(columns[6], true)
-                    );
-                }
-                if (typeof(T) == typeof(Footwear))
-                {
-                    return (T)(object)new Footwear(
-                        id: int.Parse(columns[0]),
-                        name: columns[1],
-                        size: Enum.Parse<Size>(columns[2], true),
-                        gender: Enum.Parse<Gender>(columns[3], true),
-                        price: decimal.Parse(columns[4]),
-                        quantity: int.Parse(columns[5]),
-                        footwearType: Enum.Parse<FootwearType>(columns[6], true)
-                    );
-                }
-                throw new NotSupportedException($"Type {typeof(T).Name} is not supported.");
-            }
-            catch (Exception ex)
-            {
-                throw new FormatException($"Failed to parse CSV line: {line}", ex);
-            }
-        }
-    }
-
-    // TestInMemoryDependencies.cs (continued)
-
-    /// <summary>
-    /// A factory for unit tests that provides the configured InMemory DAOs.
-    /// </summary>
-    public class InMemoryDaoFactory : IItemDaoFactory
-    {
-        private readonly IItemDao<Clothing> _clothingDao;
-        private readonly IItemDao<Footwear> _footwearDao;
-
-        // Constructor matches the dependencies created in TestServiceBuilder.Build()
-        public InMemoryDaoFactory(IItemDao<Clothing> clothingDao, IItemDao<Footwear> footwearDao)
-        {
-            _clothingDao = clothingDao;
-            _footwearDao = footwearDao;
-        }
-
-        public IItemDao<T> CreateItemDao<T>() where T : Item
-        {
-            if (typeof(T) == typeof(Clothing))
-                return (IItemDao<T>)_clothingDao;
-
-            if (typeof(T) == typeof(Footwear))
-                return (IItemDao<T>)_footwearDao;
-
-            throw new NotSupportedException($"Type {typeof(T).Name} is not supported by this InMemoryDaoFactory.");
-        }
-
-        // Minimal implementation for the factory contract
-        public void ConfigureItemDao<T>(IItemDao<T> dao) where T : Item { }
-
-        public void ConfigureSource<T>(ISource<T> source) where T : Item
-        {
-            throw new NotImplementedException();
-        }
-    }
+    private static string GetDataFolder() =>
+        Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\Data"));
 }
 
-// TestDataFactory.cs
-// Centralized test data creation
-public static class TestDataFactory
+/// <summary>
+/// Integration tests that use actual CSV files from the Data directory
+/// </summary>
+public class FileBasedServiceTests
 {
-    public static List<Clothing> CreateTestClothing()
+    private readonly ItemService _service;
+
+    public FileBasedServiceTests()
     {
-        return new List<Clothing>
-        {
-            new Clothing(1, "T-Shirt", Size.M, Gender.M, 15000.00m, 50, ClothingType.Top),
-            new Clothing(2, "Jeans", Size.L, Gender.F, 35000.00m, 30, ClothingType.Bottom),
-            new Clothing(3, "Dress", Size.S, Gender.F, 45000.00m, 20, ClothingType.Fullbody),
-            new Clothing(4, "Jacket", Size.XL, Gender.M, 65000.00m, 15, ClothingType.Outerwear),
-            new Clothing(5, "Sweater", Size.M, Gender.U, 25000.00m, 40, ClothingType.Top)
-        };
+        _service = new FileBasedServiceBuilder().Build();
     }
 
-    public static List<Footwear> CreateTestFootwear()
+    [Fact]
+    public void FindClothings_FromFile_ShouldReturn19Items()
     {
-        return new List<Footwear>
-        {
-            new Footwear(1, "Running Shoes", Size.M, Gender.M, 55000.00m, 25, FootwearType.Casual),
-            new Footwear(2, "Boots", Size.L, Gender.F, 75000.00m, 15, FootwearType.Special),
-            new Footwear(3, "Sandals", Size.S, Gender.U, 20000.00m, 50, FootwearType.Casual),
-            new Footwear(4, "Formal Shoes", Size.M, Gender.M, 85000.00m, 10, FootwearType.Formal),
-            new Footwear(5, "Slippers", Size.L, Gender.F, 12000.00m, 60, FootwearType.Casual)
-        };
+        // Act
+        var clothing = _service.FindClothings().ToList();
+
+        // Assert
+        Assert.Equal(19, clothing.Count);
+        Assert.All(clothing, item => Assert.IsType<Clothing>(item));
     }
 
-    public static Clothing CreateClothing(
-        int id = 1,
-        string name = "Test Clothing",
-        Size size = Size.M,
-        Gender gender = Gender.U,
-        decimal price = 30000.00m,
-        int quantity = 20,
-        ClothingType clothingType = ClothingType.Top)
+    [Fact]
+    public void FindFootwears_FromFile_ShouldReturn15Items()
     {
-        return new Clothing(id, name, size, gender, price, quantity, clothingType);
+        // Act
+        var footwear = _service.FindFootwears().ToList();
+
+        // Assert
+        Assert.Equal(15, footwear.Count);
+        Assert.All(footwear, item => Assert.IsType<Footwear>(item));
     }
 
-    public static Footwear CreateFootwear(
-        int id = 1,
-        string name = "Test Footwear",
-        Size size = Size.M,
-        Gender gender = Gender.U,
-        decimal price = 40000.00m,
-        int quantity = 15,
-        FootwearType footwearType = FootwearType.Casual)
+    [Fact]
+    public void FindAllProducts_FromFile_ShouldReturn34TotalItems()
     {
-        return new Footwear(id, name, size, gender, price, quantity, footwearType);
+        // Act
+        var allClothing = _service.FindClothings().ToList();
+        var allFootwear = _service.FindFootwears().ToList();
+        var totalCount = allClothing.Count + allFootwear.Count;
+
+        // Assert
+        Assert.Equal(34, totalCount);
     }
 
-    public static List<Clothing> CreateClothingWithPrices(params decimal[] prices)
+    [Fact]
+    public void FindByPrice_Under30_ShouldReturnCorrectItems()
     {
-        return prices.Select((price, index) =>
-            CreateClothing(id: index + 1, price: price)).ToList();
-    }
+        var priceRange = new Range<decimal>(0m, 30m);
 
-    public static List<Footwear> CreateFootwearWithPrices(params decimal[] prices)
-    {
-        return prices.Select((price, index) =>
-            CreateFootwear(id: index + 1, price: price)).ToList();
-    }
+        // Act
+        var products = _service.FindByPrice(priceRange).ToList();
 
-    public static List<Clothing> CreateClothingBySizes(params Size[] sizes)
-    {
-        return sizes.Select((size, index) =>
-            CreateClothing(id: index + 1, size: size)).ToList();
-    }
-
-    public static List<Footwear> CreateFootwearBySizes(params Size[] sizes)
-    {
-        return sizes.Select((size, index) =>
-            CreateFootwear(id: index + 1, size: size)).ToList();
-    }
-
-    public static List<Clothing> CreateClothingByGender(Gender gender, int count = 5)
-    {
-        return Enumerable.Range(1, count)
-            .Select(i => CreateClothing(id: i, gender: gender))
-            .ToList();
-    }
-
-    public static List<Footwear> CreateFootwearByGender(Gender gender, int count = 5)
-    {
-        return Enumerable.Range(1, count)
-            .Select(i => CreateFootwear(id: i, gender: gender))
-            .ToList();
-    }
-}
-
-// ProductAssertions.cs
-// Custom assertions for cleaner test code
-public static class ProductAssertions
-{
-    public static void AssertPriceInRange(this IEnumerable<Item> products, decimal min, decimal max)
-    {
-        Assert.All(products, product =>
-        {
-            Assert.True(product.Price >= min && product.Price <= max,
-                $"Product {product.Name} price {product.Price} is not in range [{min}, {max}]");
-        });
-    }
-
-    public static void AssertAllOfType<T>(this IEnumerable<T> products) where T : Item
-    {
-        Assert.All(products, product => Assert.IsType<T>(product));
-    }
-
-    public static void AssertCount(this IEnumerable<Item> products, int expectedCount)
-    {
-        Assert.Equal(expectedCount, products.Count());
-    }
-
-    public static void AssertEmpty(this IEnumerable<Item> products)
-    {
-        Assert.Empty(products);
-    }
-
-    public static void AssertNotEmpty(this IEnumerable<Item> products)
-    {
+        // Assert
         Assert.NotEmpty(products);
-    }
-
-    public static void AssertAllSize(this IEnumerable<Item> products, Size expectedSize)
-    {
+        Assert.True(products.Count >= 7, $"Expected at least 7 items under $30, but got {products.Count}");
         Assert.All(products, product =>
         {
-            Assert.Equal(expectedSize, product.Size);
+            Assert.True(product.Price >= 0m && product.Price <= 30m,
+                $"Product {product.Name} price {product.Price} is not in range [0, 30]");
         });
     }
 
-    public static void AssertAllGender(this IEnumerable<Item> products, Gender expectedGender)
+    [Fact]
+    public void FindByPrice_Over100_ShouldReturnOnlyPremiumFootwear()
     {
+        var priceRange = new Range<decimal>(100m, 200m);
+
+        // Act
+        var products = _service.FindByPrice(priceRange).ToList();
+
+        // Assert
+        Assert.NotEmpty(products);
         Assert.All(products, product =>
         {
-            Assert.Equal(expectedGender, product.Gender);
+            Assert.True(product.Price >= 100m && product.Price <= 200m);
+            Assert.IsType<Footwear>(product);
         });
     }
 
-    public static void AssertQuantityInRange(this IEnumerable<Item> products, int min, int max)
+    [Fact]
+    public void FindBySize_XS_ShouldReturnTankTopAndRomper()
     {
+        // Act
+        var products = _service.FindBySize(Size.XS).ToList();
+
+        // Assert
+        Assert.Equal(3, products.Count);
+        Assert.All(products, product => Assert.Equal(Size.XS, product.Size));
+        Assert.Contains(products, p => p.Name == "Tank Top");
+        Assert.Contains(products, p => p.Name == "Romper");
+    }
+
+    [Fact]
+    public void FindByGender_Women_ShouldReturnAtLeast10Items()
+    {
+        // Act
+        var products = _service.FindByGender(Gender.Female).ToList();
+
+        // Assert
+        Assert.True(products.Count >= 10, $"Expected at least 10 women's items, but got {products.Count}");
+        Assert.All(products, product => Assert.Equal(Gender.Female, product.Gender));
+    }
+
+    [Fact]
+    public void FindClothing_SpecificItems_ShouldExist()
+    {
+        // Act
+        var clothing = _service.FindClothings().ToList();
+
+        // Assert - Check for specific items from the CSV
+        Assert.Contains(clothing, c => c.Name == "T-Shirt" && c.Price == 19.99m);
+        Assert.Contains(clothing, c => c.Name == "Jeans" && c.Price == 49.99m);
+        Assert.Contains(clothing, c => c.Name == "Dress" && c.Price == 59.99m);
+        Assert.Contains(clothing, c => c.Name == "Baseball Cap" && c.Price == 19.99m);
+    }
+
+    [Fact]
+    public void FindFootwear_SpecificItems_ShouldExist()
+    {
+        // Act
+        var footwear = _service.FindFootwears().ToList();
+
+        // Assert - Check for specific items from the CSV
+        Assert.Contains(footwear, f => f.Name == "Classic Brown Loafers" && f.Price == 89.99m);
+        Assert.Contains(footwear, f => f.Name == "Running Sneakers Blue" && f.Price == 79.99m);
+        Assert.Contains(footwear, f => f.Name == "Wedding White Heels" && f.Price == 129.99m);
+        Assert.Contains(footwear, f => f.Name == "Beach Flip-flops" && f.Price == 29.99m);
+    }
+
+    [Fact]
+    public void FindClothing_MostExpensive_ShouldBeBlazer()
+    {
+        // Act
+        var clothing = _service.FindClothings().ToList();
+        var mostExpensive = clothing.OrderByDescending(c => c.Price).First();
+
+        // Assert
+        Assert.Equal("Blazer", mostExpensive.Name);
+        Assert.Equal(89.99m, mostExpensive.Price);
+    }
+    [Fact]
+    public void FindBySize_Medium_ShouldReturnMultipleItems()
+    {
+        // Act
+        var products = _service.FindBySize(Size.M).ToList();
+
+        // Assert
+        Assert.NotEmpty(products);
+        Assert.All(products, product => Assert.Equal(Size.M, product.Size));
+        // Expected M size items: T-Shirt, Jeans, Skirt, Polo, Shorts, Blouse, Blazer, etc.
+        Assert.True(products.Count >= 5, $"Expected at least 5 Medium items, but got {products.Count}");
+    }
+
+
+    [Fact]
+    public void FindByGender_Unisex_ShouldIncludeClothingAndFootwear()
+    {
+        // Act
+        var products = _service.FindByGender(Gender.Unisex).ToList();
+
+        // Assert
+        Assert.NotEmpty(products);
+        Assert.All(products, product => Assert.Equal(Gender.Unisex, product.Gender));
+
+        var hasClothing = products.Any(p => p is Clothing);
+        var hasFootwear = products.Any(p => p is Footwear);
+
+        Assert.True(hasClothing, "Should include unisex clothing items");
+        Assert.True(hasFootwear, "Should include unisex footwear items");
+    }
+
+    [Fact]
+    public void FindFootwear_ByType_Formal_ShouldReturn5Items()
+    {
+        // Arrange - Formal: Classic Brown Loafers, Black Oxford Shoes, Leather Derby Shoes,
+        // Business Brogues, Dress Boots
+        var footwear = _service.FindFootwears().ToList();
+
+        // Act
+        var formal = footwear.Where(f => f.FootwearType == FootwearType.Formal).ToList();
+
+        // Assert
+        Assert.Equal(5, formal.Count);
+        Assert.All(formal, f => Assert.Equal(FootwearType.Formal, f.FootwearType));
+        Assert.Contains(formal, f => f.Name == "Classic Brown Loafers");
+        Assert.Contains(formal, f => f.Name == "Black Oxford Shoes");
+    }
+
+    [Fact]
+    public void FindClothing_ByType_Bottom_ShouldReturnCorrectItems()
+    {
+        // Arrange - Bottom items: Jeans, Skirt, Shorts, Cargo Pants, Leggings, Sweatpants
+        var clothing = _service.FindClothings().ToList();
+
+        // Act
+        var bottoms = clothing.Where(c => c.ClothingType == ClothingType.Bottom).ToList();
+
+        // Assert
+        Assert.True(bottoms.Count >= 5, $"Expected at least 5 bottom items, but got {bottoms.Count}");
+        Assert.All(bottoms, c => Assert.Equal(ClothingType.Bottom, c.ClothingType));
+        Assert.Contains(bottoms, c => c.Name == "Jeans");
+        Assert.Contains(bottoms, c => c.Name == "Leggings");
+    }
+
+    [Fact]
+    public void FindByPrice_MidRange_30To70_ShouldReturnVariedProducts()
+    {
+        // Arrange - Mid-range items between $30-$70
+        var priceRange = new Range<decimal>(30m, 70m);
+
+        // Act
+        var products = _service.FindByPrice(priceRange).ToList();
+
+        // Assert
+        Assert.NotEmpty(products);
         Assert.All(products, product =>
         {
-            Assert.True(product.Quantity >= min && product.Quantity <= max,
-                $"Product {product.Name} quantity {product.Quantity} is not in range [{min}, {max}]");
+            Assert.True(product.Price >= 30m && product.Price <= 70m,
+                $"Product {product.Name} price {product.Price} is not in range [30, 70]");
         });
+
+        // Should include both clothing and footwear in this price range
+        var hasClothing = products.Any(p => p is Clothing);
+        var hasFootwear = products.Any(p => p is Footwear);
+
+        Assert.True(hasClothing || hasFootwear, "Should include products in mid-price range");
     }
-}
-
-// RangeExtensions.cs
-// Helper methods for creating ranges
-public static class RangeExtensions
-{
-    public static Range<decimal> ToPriceRange(this (decimal min, decimal max) tuple)
-    {
-        return new Range<decimal>(tuple.min, tuple.max);
-    }
-
-    public static Range<decimal> LowPriceRange() => new Range<decimal>(0m, 25000m);
-    public static Range<decimal> MidPriceRange() => new Range<decimal>(25000m, 60000m);
-    public static Range<decimal> HighPriceRange() => new Range<decimal>(60000m, 100000m);
-    public static Range<decimal> VeryHighPriceRange() => new Range<decimal>(100000m, decimal.MaxValue);
-
-    public static Range<int> ToQuantityRange(this (int min, int max) tuple)
-    {
-        return new Range<int>(tuple.min, tuple.max);
-    }
-
-    public static Range<int> LowStockRange() => new Range<int>(0, 10);
-    public static Range<int> MediumStockRange() => new Range<int>(10, 30);
-    public static Range<int> HighStockRange() => new Range<int>(30, 100);
-}
-
-// ServiceTestFixture.cs
-// Reusable test fixture for xUnit
-public class ServiceTestFixture : IDisposable
-{
-    public List<Clothing> TestClothing { get; }
-    public List<Footwear> TestFootwear { get; }
-    public ItemService Service { get; }
-
-    public ServiceTestFixture()
-    {
-        TestClothing = TestDataFactory.CreateTestClothing();
-        TestFootwear = TestDataFactory.CreateTestFootwear();
-        Service = new TestServiceBuilder()
-            .WithClothing(TestClothing)
-            .WithFootwear(TestFootwear)
-            .Build();
-    }
-
-    public void Dispose()
-    {
-        // Cleanup if needed
-    }
-}
-
-// Updated ServiceTests.cs showing usage
-public class ServiceTests : IClassFixture<ServiceTestFixture>
-{
-    private readonly ServiceTestFixture _fixture;
-
-    public ServiceTests(ServiceTestFixture fixture)
-    {
-        _fixture = fixture;
-    }
-
-    [Fact]
-    public void FindClothing_ShouldReturnAllClothing()
-    {
-        // Arrange - using fixture
-        var service = _fixture.Service;
-
-        // Act
-        var clothing = service.FindClothings();
-
-        // Assert - using custom assertions
-        clothing.AssertCount(_fixture.TestClothing.Count);
-        clothing.AssertAllOfType<Clothing>();
-    }
-
-    [Fact]
-    public void FindFootwear_ShouldReturnAllFootwear()
-    {
-        // Arrange
-        var service = _fixture.Service;
-
-        // Act
-        var footwear = service.FindFootwears();
-
-        // Assert
-        footwear.AssertCount(_fixture.TestFootwear.Count);
-        footwear.AssertAllOfType<Footwear>();
-    }
-
-    [Fact]
-    public void FindByPrice_MidRange_ShouldReturnCorrectProducts()
-    {
-        // Arrange - using builder and range extensions
-        var service = new TestServiceBuilder()
-            .WithDefaultClothing()
-            .WithDefaultFootwear()
-            .Build();
-
-        // Act
-        var products = service.FindByPrice(RangeExtensions.MidPriceRange());
-
-        // Assert - using custom assertions
-        products.AssertNotEmpty();
-        products.AssertPriceInRange(25000m, 60000m);
-    }
-
-    [Theory]
-    [InlineData(0, 25000)]
-    [InlineData(25000, 60000)]
-    [InlineData(60000, 100000)]
-    public void FindByPrice_VariousRanges_ShouldReturnCorrectProducts(decimal min, decimal max)
-    {
-        // Arrange
-        var service = new TestServiceBuilder()
-            .WithDefaultClothing()
-            .WithDefaultFootwear()
-            .Build();
-        var priceRange = (min, max).ToPriceRange();
-
-        // Act
-        var products = service.FindByPrice(priceRange);
-
-        // Assert
-        products.AssertPriceInRange(min, max);
-    }
-
-    [Fact]
-    public void FindBySize_ShouldReturnCorrectProducts()
-    {
-        // Arrange
-        var service = new TestServiceBuilder()
-            .WithDefaultClothing()
-            .WithDefaultFootwear()
-            .Build();
-
-        // Act
-        var mediumProducts = service.FindBySize(Size.M);
-
-        // Assert
-        mediumProducts.AssertNotEmpty();
-        mediumProducts.AssertAllSize(Size.M);
-    }
-
-    [Fact]
-    public void FindByGender_ShouldReturnCorrectProducts()
-    {
-        // Arrange
-        var service = new TestServiceBuilder()
-            .WithDefaultClothing()
-            .WithDefaultFootwear()
-            .Build();
-
-        // Act
-        var MProducts = service.FindByGender(Gender.M);
-
-        // Assert
-        MProducts.AssertNotEmpty();
-        MProducts.AssertAllGender(Gender.M);
-    }
-
-    [Fact]
-    public void FindByPrice_CustomData_ShouldWork()
-    {
-        // Arrange - using factory methods for custom test data
-        var clothing = TestDataFactory.CreateClothingWithPrices(10000m, 50000m, 90000m);
-        var footwear = TestDataFactory.CreateFootwearWithPrices(20000m, 60000m, 100000m);
-
-        var service = new TestServiceBuilder()
-            .WithClothing(clothing)
-            .WithFootwear(footwear)
-            .Build();
-
-        // Act
-        var cheapProducts = service.FindByPrice((0m, 40000m).ToPriceRange());
-
-        // Assert
-        cheapProducts.AssertCount(2);
-    }
-}
-
-// ClothingBuilder.cs
-// Fluent builder for individual test items
-public class ClothingBuilder
-{
-    private int _id = 1;
-    private string _name = "Test Clothing";
-    private Size _size = Size.M;
-    private Gender _gender = Gender.U;
-    private decimal _price = 30000.00m;
-    private int _quantity = 20;
-    private ClothingType _clothingType = ClothingType.Top;
-
-    public ClothingBuilder WithId(int id) { _id = id; return this; }
-    public ClothingBuilder WithName(string name) { _name = name; return this; }
-    public ClothingBuilder WithSize(Size size) { _size = size; return this; }
-    public ClothingBuilder WithGender(Gender gender) { _gender = gender; return this; }
-    public ClothingBuilder WithPrice(decimal price) { _price = price; return this; }
-    public ClothingBuilder WithQuantity(int quantity) { _quantity = quantity; return this; }
-    public ClothingBuilder WithClothingType(ClothingType clothingType) { _clothingType = clothingType; return this; }
-
-    public Clothing Build() => new Clothing(_id, _name, _size, _gender, _price, _quantity, _clothingType);
-}
-
-// FootwearBuilder.cs
-public class FootwearBuilder
-{
-    private int _id = 1;
-    private string _name = "Test Footwear";
-    private Size _size = Size.M;
-    private Gender _gender = Gender.U;
-    private decimal _price = 40000.00m;
-    private int _quantity = 15;
-    private FootwearType _footwearType = FootwearType.Casual;
-
-    public FootwearBuilder WithId(int id) { _id = id; return this; }
-    public FootwearBuilder WithName(string name) { _name = name; return this; }
-    public FootwearBuilder WithSize(Size size) { _size = size; return this; }
-    public FootwearBuilder WithGender(Gender gender) { _gender = gender; return this; }
-    public FootwearBuilder WithPrice(decimal price) { _price = price; return this; }
-    public FootwearBuilder WithQuantity(int quantity) { _quantity = quantity; return this; }
-    public FootwearBuilder WithFootwearType(FootwearType footwearType) { _footwearType = footwearType; return this; }
-
-    public Footwear Build() => new Footwear(_id, _name, _size, _gender, _price, _quantity, _footwearType);
 }
