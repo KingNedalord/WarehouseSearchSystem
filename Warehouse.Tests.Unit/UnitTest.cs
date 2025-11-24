@@ -193,4 +193,105 @@ public class FileBasedServiceTests
         Assert.Contains(unisexItems, i => i.Name == "Running Sneakers Blue");
     }
 
+
+    [Fact]
+    public void FindClothing_ByType_Top_ShouldReturn6Items()
+    {
+        var tops = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Top);
+
+        Assert.NotEmpty(tops);
+        Assert.Equal(6, tops.Count);
+        Assert.All(tops, c => Assert.Equal(ClothingType.Top, c.ClothingType));
+        Assert.Contains(tops, c => c.Name == "T-Shirt" && c.Price == 19.99m);
+        Assert.Contains(tops, c => c.Name == "Polo" && c.Price == 24.99m);
+        Assert.Contains(tops, c => c.Name == "Sweater" && c.Price == 44.99m);
+    }
+
+    [Fact]
+    public void FindClothing_ByType_Bottom_ShouldReturn5Items()
+    {
+        var bottoms = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Bottom);
+
+        Assert.NotEmpty(bottoms);
+        Assert.Equal(6, bottoms.Count);
+        Assert.All(bottoms, c => Assert.Equal(ClothingType.Bottom, c.ClothingType));
+        Assert.Contains(bottoms, c => c.Name == "Jeans" && c.Price == 49.99m);
+        Assert.Contains(bottoms, c => c.Name == "Shorts" && c.Price == 22.99m);
+        Assert.Contains(bottoms, c => c.Name == "Leggings" && c.Price == 29.99m);
+    }
+
+    [Fact]
+    public void FindFootwear_ByType_Casual_ShouldReturn5Items()
+    {
+        var casualFootwear = _service.FindBy<Footwear>(f => f.FootwearType == FootwearType.Casual);
+
+        Assert.NotEmpty(casualFootwear);
+        Assert.Equal(5, casualFootwear.Count);
+        Assert.All(casualFootwear, f => Assert.Equal(FootwearType.Casual, f.FootwearType));
+        Assert.Contains(casualFootwear, f => f.Name == "Running Sneakers Blue" && f.Price == 119.99m);
+        Assert.Contains(casualFootwear, f => f.Name == "Canvas Slip-ons" && f.Price == 59.99m);
+        Assert.Contains(casualFootwear, f => f.Name == "Beach Flip-flops" && f.Price == 34.99m);
+    }
+
+    [Fact]
+    public void FindByPrice_Under50_ShouldReturnAffordableItems()
+    {
+        var affordableItems = _service.FindAllBy(i => i.Price < 50m);
+
+        Assert.NotEmpty(affordableItems);
+        Assert.All(affordableItems, i => Assert.True(i.Price < 50m));
+        Assert.Contains(affordableItems, i => i.Name == "T-Shirt" && i.Price == 19.99m);
+        Assert.Contains(affordableItems, i => i.Name == "Tank Top" && i.Price == 14.99m);
+        Assert.Contains(affordableItems, i => i.Name == "Beach Flip-flops" && i.Price == 34.99m);
+    }
+
+    [Fact]
+    public void FindClothing_ByType_Outerwear_ShouldReturn3Items()
+    {
+        var outerwear = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Outerwear);
+
+        Assert.NotEmpty(outerwear);
+        Assert.Equal(3, outerwear.Count);
+        Assert.All(outerwear, c => Assert.Equal(ClothingType.Outerwear, c.ClothingType));
+        Assert.Contains(outerwear, c => c.Name == "Hoodie" && c.Price == 39.99m);
+        Assert.Contains(outerwear, c => c.Name == "Jacket" && c.Price == 79.99m);
+        Assert.Contains(outerwear, c => c.Name == "Blazer" && c.Price == 89.99m);
+    }
+
+    [Fact]
+    public void FindBySize_Large_ShouldReturnCorrectItems()
+    {
+        var largeItems = _service.FindAllBy(i => i.Size == Size.L);
+
+        Assert.NotEmpty(largeItems);
+        Assert.Equal(7, largeItems.Count);
+        Assert.All(largeItems, i => Assert.Equal(Size.L, i.Size));
+        Assert.Contains(largeItems, i => i.Name == "Hoodie");
+        Assert.Contains(largeItems, i => i.Name == "Classic Brown Loafers");
+        Assert.Contains(largeItems, i => i.Name == "Dress Boots");
+    }
+
+    [Fact]
+    public void FindFootwear_MaleOnly_ShouldReturn5Items()
+    {
+        var maleFootwear = _service.FindBy<Footwear>(f => f.Gender == Gender.Male);
+
+        Assert.NotEmpty(maleFootwear);
+        Assert.Equal(5, maleFootwear.Count);
+        Assert.All(maleFootwear, f => Assert.Equal(Gender.Male, f.Gender));
+        Assert.Contains(maleFootwear, f => f.Name == "Classic Brown Loafers" && f.Price == 129.99m);
+        Assert.Contains(maleFootwear, f => f.Name == "Black Oxford Shoes" && f.Price == 149.99m);
+    }
+
+    [Fact]
+    public void FindByQuantity_LowStock_ShouldReturnItemsUnder30()
+    {
+        var lowStockItems = _service.FindAllBy(i => i.Quantity < 30);
+
+        Assert.NotEmpty(lowStockItems);
+        Assert.All(lowStockItems, i => Assert.True(i.Quantity < 30));
+        Assert.Contains(lowStockItems, i => i.Name == "Wedding White Heels" && i.Quantity == 15);
+        Assert.Contains(lowStockItems, i => i.Name == "Classic Brown Loafers" && i.Quantity == 25);
+        Assert.Contains(lowStockItems, i => i.Name == "Prom Glitter Pumps" && i.Quantity == 12);
+    }
 }
