@@ -6,24 +6,28 @@ namespace Warehouse.Services;
 public interface IItemService
 {
     /// <summary>
-    /// Finds all available Clothings
+    /// Finds all available Items(Clothings/Footwears)
     /// </summary>
-    /// <returns>List of all Clothings</returns>
-    IList<Clothing> FindClothings();
-
-    /// <summary>
-    /// Finds all available Footwears
-    /// </summary>
-    /// <returns>List of all Footwears</returns>
-    IList<Footwear> FindFootwears();
-
-    /// <summary>
-    /// Finds Items within the specified price range
-    /// </summary
-    /// <param name="range">Price range to search within</param>
-    /// <returns>List of Items matching the price criteria</returns>
+    /// <returns>List of all Items</returns>
     /// <exception cref="ServiceException">When DAO operations fail</exception>
-    IList<Item> FindByPrice(Range<decimal> range);
+    public List<T> FindAll<T>() where T : Item;
+
+    /// <summary>
+    /// Finds all available Items
+    /// </summary>
+    /// <returns>List of all Items</returns>
+    /// <exception cref="ServiceException">When DAO operations fail</exception>
+    public List<Item> FindAllItems();
+
+    /// <summary>
+    /// Finds all available Items matching the predicate
+    /// </summary>
+    public List<Item> FindAllBy(Func<Item, bool> predicate);
+
+    /// <summary>
+    /// Finds all available Items of type T matching the predicate
+    /// </summary>
+    public List<T> FindBy<T>(Func<T, bool> predicate) where T : Item;
 }
 
 

@@ -1,4 +1,5 @@
-﻿using Warehouse.Models;
+﻿using System.Linq.Expressions;
+using Warehouse.Models;
 namespace Warehouse.DAO;
 /// <summary>
 /// Generic DAO implementation for Straight approach that uses a data source to load and filter Items
@@ -40,16 +41,6 @@ public class ItemDao<T> : IItemDao<T> where T : Item
 
     private IEnumerable<T> EnumerateAll()
     {
-        if (source.IsInMemory && source is IEnumerable<T> enumerable)
-        {
-            foreach (var item in enumerable)
-            {
-                yield return item;
-            }
-            yield break;
-        }
-
-        // Otherwise, read from CSV
         var path = GetPath();
         using var sr = new StreamReader(path);
         string line;

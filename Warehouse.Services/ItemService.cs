@@ -1,6 +1,7 @@
 using Warehouse.DAO;
 using Warehouse.Models;
 namespace Warehouse.Services;
+
 /// <summary>
 /// Service implementation for Item operations with dependency injection support
 /// </summary>
@@ -19,16 +20,44 @@ public class ItemService : IItemService
     }
 
     /// <summary>
-    /// Finds all available Clothings
+    /// Finds all available Items(Clothings/Footwears)
     /// </summary>
-    /// <returns>List of all Clothings</returns>
+    /// <returns>List of all Items</returns>
     /// <exception cref="ServiceException">When DAO operations fail</exception>
-    public IList<Clothing> FindClothings()
+    public List<T> FindAll<T>() where T : Item
     {
         try
         {
-            var ClothingDao = ItemDaoFactory.CreateItemDao<Clothing>();
-            return [.. ClothingDao.FindAll()];
+            var itemDao = ItemDaoFactory.CreateItemDao<T>();
+            // items.AddRange(ClothingDao.FindAll());
+            return [.. itemDao.FindAll()];
+        }
+        catch (DaoException ex)
+        {
+            throw new ServiceException("Error searching for Clothings", ex);
+        }
+    }
+
+
+    /// <summary>
+    /// Finds all available Items
+    /// </summary>
+    /// <returns>List of all Items</returns>
+    /// <exception cref="ServiceException">When DAO operations fail</exception>
+    public List<Item> FindAllItems()
+    {
+        try
+        {
+            var clothingDao = ItemDaoFactory.CreateItemDao<Clothing>();
+            List<Item> items = [.. clothingDao.FindAll()];
+            var footwearDao = ItemDaoFactory.CreateItemDao<Footwear>();
+            foreach (var item in footwearDao.FindAll())
+            {
+                items.Add(item);
+            }
+            // return [.. itemDao.FindAll()];
+
+            return items;
         }
         catch (DaoException ex)
         {
@@ -37,126 +66,52 @@ public class ItemService : IItemService
     }
 
     /// <summary>
-    /// Finds all available Footwears
+    /// Finds all available Items matching the predicate
     /// </summary>
-    /// <returns>List of all Footwears</returns>
-    /// <exception cref="ServiceException">When DAO operations fail</exception>
-    public IList<Footwear> FindFootwears()
+    public List<Item> FindAllBy(Func<Item, bool> predicate)
     {
         try
         {
-            var FootwearDao = ItemDaoFactory.CreateItemDao<Footwear>();
-            return [.. FootwearDao.FindAll()];
+            // var dao = ItemDaoFactory.CreateItemDao<T>();
+            var items = FindAllItems();
+            var results = new List<Item>();
+            foreach (var item in items)
+            {
+                if (predicate(item))
+                {
+                    results.Add(item);
+                }
+            }
+            return results;
         }
         catch (DaoException ex)
         {
-            throw new ServiceException("Error searching for Footwears", ex);
+            throw new ServiceException($"Error searching for {typeof(Item).Name}", ex);
         }
     }
 
     /// <summary>
-    /// Finds Items within the specified price range
+    /// Finds all available Items of type T matching the predicate
     /// </summary>
-    /// <param name="range">Price range to search within</param>
-    /// <returns>List of Items matching the price criteria</returns>
-    /// <exception cref="ServiceException">When DAO operations fail</exception>
-    public IList<Item> FindByPrice(Range<decimal> range)
+    public List<T> FindBy<T>(Func<T, bool> predicate) where T : Item
     {
-        var allItems = new List<Item>();
         try
         {
-            var allClothing = FindClothings();
-            var filteredCLothing = allClothing
-            .Where(f => f.Price >= range.Min && f.Price <= range.Max)
-            .ToList();
-            allItems.AddRange(filteredCLothing);
+            // var dao = ItemDaoFactory.CreateItemDao<T>();
+            var items = FindAll<T>();
+            var results = new List<T>();
+            foreach (var item in items)
+            {
+                if (predicate(item))
+                {
+                    results.Add(item);
+                }
+            }
+            return results;
         }
         catch (DaoException ex)
         {
-            throw new ServiceException("Error searching for Clothing by price", ex);
+            throw new ServiceException($"Error searching for {typeof(T).Name}", ex);
         }
-        try
-        {
-            var allFootwear = FindFootwears();
-
-            var filteredFootwear = allFootwear
-                .Where(f => f.Price >= range.Min && f.Price <= range.Max)
-                .ToList();
-
-            allItems.AddRange(filteredFootwear);
-        }
-        catch (DaoException ex)
-        {
-            throw new ServiceException("Error searching for Footwear by price", ex);
-        }
-
-        return allItems;
-    }
-
-    public IList<Item> FindBySize(Size s)
-    {
-        var allItems = new List<Item>();
-        try
-        {
-            var allClothing = FindClothings();
-            var filteredCLothing = allClothing
-            .Where(f => f.Size == s)
-            .ToList();
-            allItems.AddRange(filteredCLothing);
-        }
-        catch (DaoException ex)
-        {
-            throw new ServiceException("Error searching for Clothing by size", ex);
-        }
-        try
-        {
-            var allFootwear = FindFootwears();
-
-            var filteredFootwear = allFootwear
-                .Where(f => f.Size == s)
-                .ToList();
-
-            allItems.AddRange(filteredFootwear);
-        }
-        catch (DaoException ex)
-        {
-            throw new ServiceException("Error searching for Footwear by size", ex);
-        }
-
-        return allItems;
-    }
-
-
-    public IList<Item> FindByGender(Gender g)
-    {
-        var allItems = new List<Item>();
-        try
-        {
-            var allClothing = FindClothings();
-            var filteredCLothing = allClothing
-            .Where(f => f.Gender == g)
-            .ToList();
-            allItems.AddRange(filteredCLothing);
-        }
-        catch (DaoException ex)
-        {
-            throw new ServiceException("Error searching for Clothing by gender", ex);
-        }
-        try
-        {
-            var allFootwear = FindFootwears();
-
-            var filteredFootwear = allFootwear
-                .Where(f => f.Gender == g)
-                .ToList();
-
-            allItems.AddRange(filteredFootwear);
-        }
-        catch (DaoException ex)
-        {
-            throw new ServiceException("Error searching for Footwear by gender", ex);
-        }
-
-        return allItems;
     }
 }

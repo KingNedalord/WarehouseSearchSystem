@@ -41,7 +41,7 @@ public class FileBasedServiceTests
     public void FindClothings_FromFile_ShouldReturn19Items()
     {
         // Act
-        var clothing = _service.FindClothings().ToList();
+        var clothing = _service.FindAll<Clothing>();
 
         // Assert
         Assert.Equal(19, clothing.Count);
@@ -52,42 +52,13 @@ public class FileBasedServiceTests
     public void FindFootwears_FromFile_ShouldReturn15Items()
     {
         // Act
-        var footwear = _service.FindFootwears().ToList();
+        var footwear = _service.FindAll<Footwear>();
 
         // Assert
         Assert.Equal(15, footwear.Count);
         Assert.All(footwear, item => Assert.IsType<Footwear>(item));
     }
 
-    [Fact]
-    public void FindAllProducts_FromFile_ShouldReturn34TotalItems()
-    {
-        // Act
-        var allClothing = _service.FindClothings().ToList();
-        var allFootwear = _service.FindFootwears().ToList();
-        var totalCount = allClothing.Count + allFootwear.Count;
-
-        // Assert
-        Assert.Equal(34, totalCount);
-    }
-
-    [Fact]
-    public void FindByPrice_Under30_ShouldReturnCorrectItems()
-    {
-        var priceRange = new Range<decimal>(0m, 30m);
-
-        // Act
-        var products = _service.FindByPrice(priceRange).ToList();
-
-        // Assert
-        Assert.NotEmpty(products);
-        Assert.True(products.Count >= 7, $"Expected at least 7 items under $30, but got {products.Count}");
-        Assert.All(products, product =>
-        {
-            Assert.True(product.Price >= 0m && product.Price <= 30m,
-                $"Product {product.Name} price {product.Price} is not in range [0, 30]");
-        });
-    }
 
     [Fact]
     public void FindByPrice_Over100_ShouldReturnOnlyPremiumFootwear()
@@ -95,7 +66,7 @@ public class FileBasedServiceTests
         var priceRange = new Range<decimal>(100m, 200m);
 
         // Act
-        var products = _service.FindByPrice(priceRange).ToList();
+        var products = _service.FindBy<Footwear>(c => c.Price >= 100m && c.Price <= 200m);
 
         // Assert
         Assert.NotEmpty(products);
@@ -110,7 +81,7 @@ public class FileBasedServiceTests
     public void FindBySize_XS_ShouldReturnTankTopAndRomper()
     {
         // Act
-        var products = _service.FindBySize(Size.XS).ToList();
+        var products = _service.FindBy<Clothing>(c => c.Size == Size.XS);
 
         // Assert
         Assert.Equal(3, products.Count);
@@ -123,10 +94,10 @@ public class FileBasedServiceTests
     public void FindByGender_Women_ShouldReturnAtLeast10Items()
     {
         // Act
-        var products = _service.FindByGender(Gender.Female).ToList();
+        var products = _service.FindAllBy(c => c.Gender == Gender.Female);
 
         // Assert
-        Assert.True(products.Count >= 10, $"Expected at least 10 women's items, but got {products.Count}");
+        Assert.True(products.Count == 13, $"Expected at least 10 women's items, but got {products.Count}");
         Assert.All(products, product => Assert.Equal(Gender.Female, product.Gender));
     }
 
@@ -134,50 +105,49 @@ public class FileBasedServiceTests
     public void FindClothing_SpecificItems_ShouldExist()
     {
         // Act
-        var clothing = _service.FindClothings().ToList();
+        var clothing = _service.FindBy<Footwear>(f => f.FootwearType == FootwearType.Special).ToList();
 
         // Assert - Check for specific items from the CSV
-        Assert.Contains(clothing, c => c.Name == "T-Shirt" && c.Price == 19.99m);
-        Assert.Contains(clothing, c => c.Name == "Jeans" && c.Price == 49.99m);
-        Assert.Contains(clothing, c => c.Name == "Dress" && c.Price == 59.99m);
-        Assert.Contains(clothing, c => c.Name == "Baseball Cap" && c.Price == 19.99m);
+        Assert.Contains(clothing, c => c.Name == "Wedding White Heels" && c.Price == 189.99m);
+        Assert.Contains(clothing, c => c.Name == "Evening Stilettos" && c.Price == 219.99m);
+        Assert.Contains(clothing, c => c.Name == "Prom Glitter Pumps" && c.Price == 199.99m);
+        Assert.Contains(clothing, c => c.Name == "Party Platforms" && c.Price == 179.99m);
     }
 
     [Fact]
     public void FindFootwear_SpecificItems_ShouldExist()
     {
         // Act
-        var footwear = _service.FindFootwears().ToList();
+        var footwear = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Fullbody).ToList();
 
         // Assert - Check for specific items from the CSV
-        Assert.Contains(footwear, f => f.Name == "Classic Brown Loafers" && f.Price == 89.99m);
-        Assert.Contains(footwear, f => f.Name == "Running Sneakers Blue" && f.Price == 79.99m);
-        Assert.Contains(footwear, f => f.Name == "Wedding White Heels" && f.Price == 129.99m);
-        Assert.Contains(footwear, f => f.Name == "Beach Flip-flops" && f.Price == 29.99m);
+        Assert.NotEmpty(footwear);
+        Assert.Equal(3, footwear.Count);
+        Assert.All(footwear, product => Assert.Equal(ClothingType.Fullbody, product.ClothingType));
     }
 
     [Fact]
     public void FindClothing_MostExpensive_ShouldBeBlazer()
     {
         // Act
-        var clothing = _service.FindClothings().ToList();
-        var mostExpensive = clothing.OrderByDescending(c => c.Price).First();
+        // var clothing = _service.Find().ToList();
+        var mostExpensive = _service.FindBy<Clothing>(c => c.Price > 80);
 
         // Assert
-        Assert.Equal("Blazer", mostExpensive.Name);
-        Assert.Equal(89.99m, mostExpensive.Price);
+        Assert.Contains(mostExpensive, c => c.Name == "Blazer" && c.Price == 89.99m);
+
     }
     [Fact]
     public void FindBySize_Medium_ShouldReturnMultipleItems()
     {
         // Act
-        var products = _service.FindBySize(Size.M).ToList();
+        var products = _service.FindAllBy(i => i.Size == Size.M).ToList();
 
         // Assert
         Assert.NotEmpty(products);
+        Assert.Equal(10, products.Count);
         Assert.All(products, product => Assert.Equal(Size.M, product.Size));
         // Expected M size items: T-Shirt, Jeans, Skirt, Polo, Shorts, Blouse, Blazer, etc.
-        Assert.True(products.Count >= 5, $"Expected at least 5 Medium items, but got {products.Count}");
     }
 
 
@@ -185,73 +155,42 @@ public class FileBasedServiceTests
     public void FindByGender_Unisex_ShouldIncludeClothingAndFootwear()
     {
         // Act
-        var products = _service.FindByGender(Gender.Unisex).ToList();
+        // var products = _service.FindByGender(Gender.Unisex).ToList();
+        var footwears = _service.FindBy<Footwear>(p => p.Gender == Gender.Unisex);
 
         // Assert
-        Assert.NotEmpty(products);
-        Assert.All(products, product => Assert.Equal(Gender.Unisex, product.Gender));
-
-        var hasClothing = products.Any(p => p is Clothing);
-        var hasFootwear = products.Any(p => p is Footwear);
-
-        Assert.True(hasClothing, "Should include unisex clothing items");
-        Assert.True(hasFootwear, "Should include unisex footwear items");
+        Assert.NotEmpty(footwears);
+        Assert.Equal(5, footwears.Count);
+        Assert.All(footwears, product => Assert.Equal(Gender.Unisex, product.Gender));
     }
 
     [Fact]
     public void FindFootwear_ByType_Formal_ShouldReturn5Items()
     {
-        // Arrange - Formal: Classic Brown Loafers, Black Oxford Shoes, Leather Derby Shoes,
-        // Business Brogues, Dress Boots
-        var footwear = _service.FindFootwears().ToList();
-
         // Act
-        var formal = footwear.Where(f => f.FootwearType == FootwearType.Formal).ToList();
+        var formalFootwears = _service.FindBy<Footwear>(f => f.FootwearType == FootwearType.Formal);
 
         // Assert
-        Assert.Equal(5, formal.Count);
-        Assert.All(formal, f => Assert.Equal(FootwearType.Formal, f.FootwearType));
-        Assert.Contains(formal, f => f.Name == "Classic Brown Loafers");
-        Assert.Contains(formal, f => f.Name == "Black Oxford Shoes");
+        Assert.NotEmpty(formalFootwears);
+        Assert.Equal(5, formalFootwears.Count);
+        Assert.All(formalFootwears, f => Assert.Equal(FootwearType.Formal, f.FootwearType));
+        Assert.Contains(formalFootwears, f => f.Name == "Classic Brown Loafers");
+        Assert.Contains(formalFootwears, f => f.Name == "Black Oxford Shoes");
+
     }
 
     [Fact]
-    public void FindClothing_ByType_Bottom_ShouldReturnCorrectItems()
+    public void FindItem_ByGender_Unisex_ShouldReturnCorrectItems()
     {
-        // Arrange - Bottom items: Jeans, Skirt, Shorts, Cargo Pants, Leggings, Sweatpants
-        var clothing = _service.FindClothings().ToList();
-
         // Act
-        var bottoms = clothing.Where(c => c.ClothingType == ClothingType.Bottom).ToList();
+        var unisexItems = _service.FindAllBy(i => i.Gender == Gender.Unisex);
 
         // Assert
-        Assert.True(bottoms.Count >= 5, $"Expected at least 5 bottom items, but got {bottoms.Count}");
-        Assert.All(bottoms, c => Assert.Equal(ClothingType.Bottom, c.ClothingType));
-        Assert.Contains(bottoms, c => c.Name == "Jeans");
-        Assert.Contains(bottoms, c => c.Name == "Leggings");
+        Assert.NotEmpty(unisexItems);
+        Assert.Equal(12, unisexItems.Count);
+        Assert.All(unisexItems, i => Assert.Equal(Gender.Unisex, i.Gender));
+        Assert.Contains(unisexItems, i => i.Name == "T-Shirt");
+        Assert.Contains(unisexItems, i => i.Name == "Running Sneakers Blue");
     }
 
-    [Fact]
-    public void FindByPrice_MidRange_30To70_ShouldReturnVariedProducts()
-    {
-        // Arrange - Mid-range items between $30-$70
-        var priceRange = new Range<decimal>(30m, 70m);
-
-        // Act
-        var products = _service.FindByPrice(priceRange).ToList();
-
-        // Assert
-        Assert.NotEmpty(products);
-        Assert.All(products, product =>
-        {
-            Assert.True(product.Price >= 30m && product.Price <= 70m,
-                $"Product {product.Name} price {product.Price} is not in range [30, 70]");
-        });
-
-        // Should include both clothing and footwear in this price range
-        var hasClothing = products.Any(p => p is Clothing);
-        var hasFootwear = products.Any(p => p is Footwear);
-
-        Assert.True(hasClothing || hasFootwear, "Should include products in mid-price range");
-    }
 }

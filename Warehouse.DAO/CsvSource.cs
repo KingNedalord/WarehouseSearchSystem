@@ -14,8 +14,6 @@ public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
     /// </summary>
     private readonly string filePath;
 
-    public bool IsInMemory => false;
-
     /// <summary>
     /// Creates a new CSV source with the specified file name
     /// </summary>
@@ -58,18 +56,6 @@ public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
         fields.Add(sb.ToString());
         return fields.ConvertAll(f => f.Trim()).ToArray();
     }
-
-    // /// <summary>
-    // /// Splits a CSV line by delimiter
-    // /// </summary>
-    // /// <param name="line">CSV line to split</param>
-    // /// <returns>Array of values</returns>
-    // protected string[] GetSplitted(string line)
-    // {
-    //     // TODO : check if it works properly
-    //     const string delimiter = ";";
-    //     return line.Split(delimiter);
-    // }
 
     /// <summary>
     /// Parses a CSV line into an Item object
