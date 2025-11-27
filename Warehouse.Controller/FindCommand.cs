@@ -42,7 +42,6 @@ public class FindCommand : ICommand
     {
         try
         {
-            // var target = GetTypeOfItem(request.Target.ToLower());
             var target = request.Target.ToLower();
             if (request.Parameters.Length == 0)
             {
@@ -98,6 +97,9 @@ public class FindCommand : ICommand
         }
     }
 
+    /// <summary>
+    /// Builds a predicate for filtering items based on parameters
+    /// </summary>
     private Predicate<Item> GetItemsPredicate(string[] parameters)
     {
         var predicate = new PredicateBuilder<Item>();
@@ -123,6 +125,9 @@ public class FindCommand : ICommand
         return predicate.Build();
     }
 
+    /// <summary>
+    /// Builds a predicate for filtering clothing based on parameters
+    /// /// </summary>
     private Predicate<Clothing> GetClothingPredicate(string[] parameters)
     {
         var predicate = new PredicateBuilder<Clothing>();
@@ -153,7 +158,9 @@ public class FindCommand : ICommand
         return predicate.Build();
     }
 
-
+    /// <summary>
+    /// Builds a predicate for filtering footwear based on parameters
+    /// /// </summary>
     private Predicate<Footwear> GetFootwearPredicate(string[] parameters)
     {
         var predicate = new PredicateBuilder<Footwear>();
@@ -221,7 +228,9 @@ public class FindCommand : ICommand
         return new Range<decimal>(minPrice, maxPrice);
     }
 
-
+    /// <summary>
+    /// Parses size from string filter
+    /// </summary>
     private Size ParseSize(string sizeFilter)
     {
         if (sizeFilter.StartsWith("size="))
@@ -238,6 +247,9 @@ public class FindCommand : ICommand
         return size;
     }
 
+    /// <summary>
+    /// Parses gender from string filter
+    /// </summary>
     private Gender ParsGender(string genderFilter)
     {
         if (genderFilter.StartsWith("gender="))
@@ -254,6 +266,9 @@ public class FindCommand : ICommand
         return gender;
     }
 
+    /// <summary>
+    /// Parses clothing type from string filter
+    /// </summary>
     private ClothingType ParseClothingType(string typeFilter)
     {
         if (typeFilter.StartsWith("type="))
@@ -270,6 +285,9 @@ public class FindCommand : ICommand
         return type;
     }
 
+    /// <summary>
+    /// Parses footwear type from string filter
+    /// </summary>
     private FootwearType ParseFootwearType(string typeFilter)
     {
         if (typeFilter.StartsWith("type="))

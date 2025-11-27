@@ -28,11 +28,11 @@ public class FileBasedServiceBuilder
 /// <summary>
 /// Integration tests that use actual CSV files from the Data directory
 /// </summary>
-public class FileBasedServiceTests
+public class ServiceTest
 {
     private readonly ItemService _service;
 
-    public FileBasedServiceTests()
+    public ServiceTest()
     {
         _service = new FileBasedServiceBuilder().Build();
     }
