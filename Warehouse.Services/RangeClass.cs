@@ -8,9 +8,4 @@ public class Range<T> where T : IComparable<T>
         Min = min;
         Max = max;
     }
-
-    public bool Contains(T value)
-    {
-        return value.CompareTo(Min) >= 0 && value.CompareTo(Max) <= 0;
-    }
 }

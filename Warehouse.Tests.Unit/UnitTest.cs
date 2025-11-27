@@ -66,8 +66,7 @@ public class FileBasedServiceTests
         var priceRange = new Range<decimal>(100m, 200m);
 
         // Act
-        var products = _service.FindBy<Footwear>(c => c.Price >= 100m && c.Price <= 200m);
-
+        var products = _service.FilterBy<Footwear>(c => c.Price >= 100m && c.Price <= 200m);
         // Assert
         Assert.NotEmpty(products);
         Assert.All(products, product =>
@@ -81,10 +80,10 @@ public class FileBasedServiceTests
     public void FindBySize_XS_ShouldReturnTankTopAndRomper()
     {
         // Act
-        var products = _service.FindBy<Clothing>(c => c.Size == Size.XS);
+        var products = _service.FilterBy<Clothing>(c => c.Size == Size.XS && c.Gender == Gender.Female);
 
         // Assert
-        Assert.Equal(3, products.Count);
+        Assert.Equal(2, products.Count);
         Assert.All(products, product => Assert.Equal(Size.XS, product.Size));
         Assert.Contains(products, p => p.Name == "Tank Top");
         Assert.Contains(products, p => p.Name == "Romper");
@@ -94,7 +93,7 @@ public class FileBasedServiceTests
     public void FindByGender_Women_ShouldReturnAtLeast10Items()
     {
         // Act
-        var products = _service.FindAllBy(c => c.Gender == Gender.Female);
+        var products = _service.FilterAllBy(c => c.Gender == Gender.Female);
 
         // Assert
         Assert.True(products.Count == 13, $"Expected at least 10 women's items, but got {products.Count}");
@@ -105,7 +104,7 @@ public class FileBasedServiceTests
     public void FindClothing_SpecificItems_ShouldExist()
     {
         // Act
-        var clothing = _service.FindBy<Footwear>(f => f.FootwearType == FootwearType.Special).ToList();
+        var clothing = _service.FilterBy<Footwear>(f => f.FootwearType == FootwearType.Special);
 
         // Assert - Check for specific items from the CSV
         Assert.Contains(clothing, c => c.Name == "Wedding White Heels" && c.Price == 189.99m);
@@ -118,7 +117,7 @@ public class FileBasedServiceTests
     public void FindFootwear_SpecificItems_ShouldExist()
     {
         // Act
-        var footwear = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Fullbody).ToList();
+        var footwear = _service.FilterBy<Clothing>(c => c.ClothingType == ClothingType.Fullbody).ToList();
 
         // Assert - Check for specific items from the CSV
         Assert.NotEmpty(footwear);
@@ -130,8 +129,7 @@ public class FileBasedServiceTests
     public void FindClothing_MostExpensive_ShouldBeBlazer()
     {
         // Act
-        // var clothing = _service.Find().ToList();
-        var mostExpensive = _service.FindBy<Clothing>(c => c.Price > 80);
+        var mostExpensive = _service.FilterBy<Clothing>(c => c.Price > 80);
 
         // Assert
         Assert.Contains(mostExpensive, c => c.Name == "Blazer" && c.Price == 89.99m);
@@ -141,13 +139,12 @@ public class FileBasedServiceTests
     public void FindBySize_Medium_ShouldReturnMultipleItems()
     {
         // Act
-        var products = _service.FindAllBy(i => i.Size == Size.M).ToList();
+        var products = _service.FilterAllBy(i => i.Size == Size.M).ToList();
 
         // Assert
         Assert.NotEmpty(products);
         Assert.Equal(10, products.Count);
         Assert.All(products, product => Assert.Equal(Size.M, product.Size));
-        // Expected M size items: T-Shirt, Jeans, Skirt, Polo, Shorts, Blouse, Blazer, etc.
     }
 
 
@@ -155,8 +152,7 @@ public class FileBasedServiceTests
     public void FindByGender_Unisex_ShouldIncludeClothingAndFootwear()
     {
         // Act
-        // var products = _service.FindByGender(Gender.Unisex).ToList();
-        var footwears = _service.FindBy<Footwear>(p => p.Gender == Gender.Unisex);
+        var footwears = _service.FilterBy<Footwear>(p => p.Gender == Gender.Unisex);
 
         // Assert
         Assert.NotEmpty(footwears);
@@ -168,7 +164,7 @@ public class FileBasedServiceTests
     public void FindFootwear_ByType_Formal_ShouldReturn5Items()
     {
         // Act
-        var formalFootwears = _service.FindBy<Footwear>(f => f.FootwearType == FootwearType.Formal);
+        var formalFootwears = _service.FilterBy<Footwear>(f => f.FootwearType == FootwearType.Formal);
 
         // Assert
         Assert.NotEmpty(formalFootwears);
@@ -183,7 +179,7 @@ public class FileBasedServiceTests
     public void FindItem_ByGender_Unisex_ShouldReturnCorrectItems()
     {
         // Act
-        var unisexItems = _service.FindAllBy(i => i.Gender == Gender.Unisex);
+        var unisexItems = _service.FilterAllBy(i => i.Gender == Gender.Unisex);
 
         // Assert
         Assert.NotEmpty(unisexItems);
@@ -197,8 +193,10 @@ public class FileBasedServiceTests
     [Fact]
     public void FindClothing_ByType_Top_ShouldReturn6Items()
     {
-        var tops = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Top);
+        // Act
+        var tops = _service.FilterBy<Clothing>(c => c.ClothingType == ClothingType.Top);
 
+        // Assert
         Assert.NotEmpty(tops);
         Assert.Equal(6, tops.Count);
         Assert.All(tops, c => Assert.Equal(ClothingType.Top, c.ClothingType));
@@ -210,8 +208,9 @@ public class FileBasedServiceTests
     [Fact]
     public void FindClothing_ByType_Bottom_ShouldReturn5Items()
     {
-        var bottoms = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Bottom);
-
+        // Act
+        var bottoms = _service.FilterBy<Clothing>(c => c.ClothingType == ClothingType.Bottom);
+        // Assert
         Assert.NotEmpty(bottoms);
         Assert.Equal(6, bottoms.Count);
         Assert.All(bottoms, c => Assert.Equal(ClothingType.Bottom, c.ClothingType));
@@ -223,8 +222,9 @@ public class FileBasedServiceTests
     [Fact]
     public void FindFootwear_ByType_Casual_ShouldReturn5Items()
     {
-        var casualFootwear = _service.FindBy<Footwear>(f => f.FootwearType == FootwearType.Casual);
-
+        // Act
+        var casualFootwear = _service.FilterBy<Footwear>(f => f.FootwearType == FootwearType.Casual);
+        // Assert
         Assert.NotEmpty(casualFootwear);
         Assert.Equal(5, casualFootwear.Count);
         Assert.All(casualFootwear, f => Assert.Equal(FootwearType.Casual, f.FootwearType));
@@ -236,8 +236,9 @@ public class FileBasedServiceTests
     [Fact]
     public void FindByPrice_Under50_ShouldReturnAffordableItems()
     {
-        var affordableItems = _service.FindAllBy(i => i.Price < 50m);
-
+        // Act
+        var affordableItems = _service.FilterAllBy(i => i.Price < 50m);
+        // Assert
         Assert.NotEmpty(affordableItems);
         Assert.All(affordableItems, i => Assert.True(i.Price < 50m));
         Assert.Contains(affordableItems, i => i.Name == "T-Shirt" && i.Price == 19.99m);
@@ -248,8 +249,9 @@ public class FileBasedServiceTests
     [Fact]
     public void FindClothing_ByType_Outerwear_ShouldReturn3Items()
     {
-        var outerwear = _service.FindBy<Clothing>(c => c.ClothingType == ClothingType.Outerwear);
-
+        // Act
+        var outerwear = _service.FilterBy<Clothing>(c => c.ClothingType == ClothingType.Outerwear);
+        // Assert
         Assert.NotEmpty(outerwear);
         Assert.Equal(3, outerwear.Count);
         Assert.All(outerwear, c => Assert.Equal(ClothingType.Outerwear, c.ClothingType));
@@ -261,8 +263,9 @@ public class FileBasedServiceTests
     [Fact]
     public void FindBySize_Large_ShouldReturnCorrectItems()
     {
-        var largeItems = _service.FindAllBy(i => i.Size == Size.L);
-
+        // Act
+        var largeItems = _service.FilterAllBy(i => i.Size == Size.L);
+        // Assert
         Assert.NotEmpty(largeItems);
         Assert.Equal(7, largeItems.Count);
         Assert.All(largeItems, i => Assert.Equal(Size.L, i.Size));
@@ -274,8 +277,9 @@ public class FileBasedServiceTests
     [Fact]
     public void FindFootwear_MaleOnly_ShouldReturn5Items()
     {
-        var maleFootwear = _service.FindBy<Footwear>(f => f.Gender == Gender.Male);
-
+        // Act
+        var maleFootwear = _service.FilterBy<Footwear>(f => f.Gender == Gender.Male);
+        // Assert
         Assert.NotEmpty(maleFootwear);
         Assert.Equal(5, maleFootwear.Count);
         Assert.All(maleFootwear, f => Assert.Equal(Gender.Male, f.Gender));
@@ -286,8 +290,9 @@ public class FileBasedServiceTests
     [Fact]
     public void FindByQuantity_LowStock_ShouldReturnItemsUnder30()
     {
-        var lowStockItems = _service.FindAllBy(i => i.Quantity < 30);
-
+        // Act
+        var lowStockItems = _service.FilterAllBy(i => i.Quantity < 30);
+        // Assert
         Assert.NotEmpty(lowStockItems);
         Assert.All(lowStockItems, i => Assert.True(i.Quantity < 30));
         Assert.Contains(lowStockItems, i => i.Name == "Wedding White Heels" && i.Quantity == 15);

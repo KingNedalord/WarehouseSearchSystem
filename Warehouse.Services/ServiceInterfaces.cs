@@ -8,26 +8,22 @@ public interface IItemService
     /// <summary>
     /// Finds all available Items(Clothings/Footwears)
     /// </summary>
-    /// <returns>List of all Items</returns>
-    /// <exception cref="ServiceException">When DAO operations fail</exception>
     public List<T> FindAll<T>() where T : Item;
 
     /// <summary>
     /// Finds all available Items
-    /// </summary>
-    /// <returns>List of all Items</returns>
-    /// <exception cref="ServiceException">When DAO operations fail</exception>
+    /// </summary
     public List<Item> FindAllItems();
+
+    /// <summary>
+    /// Filters footwear or clothing by given predicate
+    /// </summary>
+    public List<T> FilterBy<T>(Predicate<T> predicate) where T : Item;
 
     /// <summary>
     /// Finds all available Items matching the predicate
     /// </summary>
-    public List<Item> FindAllBy(Func<Item, bool> predicate);
-
-    /// <summary>
-    /// Finds all available Items of type T matching the predicate
-    /// </summary>
-    public List<T> FindBy<T>(Func<T, bool> predicate) where T : Item;
+    public List<Item> FilterAllBy(Predicate<Item> predicate);
 }
 
 

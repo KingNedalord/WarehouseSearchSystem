@@ -29,11 +29,6 @@ public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
     /// <returns>CSV file name</returns>
     public string FilePath() => filePath;
 
-    public virtual object Clone()
-    {
-        return this.MemberwiseClone();
-    }
-
 
     protected static string[] SplitCsvLine(string line)
     {

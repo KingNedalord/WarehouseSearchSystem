@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Warehouse.Models;
+﻿using Warehouse.Models;
 namespace Warehouse.DAO;
 /// <summary>
 /// Generic DAO implementation for Straight approach that uses a data source to load and filter Items
@@ -26,7 +25,6 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     public IList<T> Find(Predicate<T> predicate)
     {
         if (predicate == null) throw new ArgumentNullException(nameof(predicate));
-        // simple implementation: load everything and filter (fine for small CSV DB)
         return FindAll().Where(i => predicate(i)).ToList();
     }
 

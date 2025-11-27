@@ -23,6 +23,7 @@
     <ProjectReference Include="..\Warehouse.Services\Warehouse.Services.csproj" />
     <ProjectReference Include="..\Warehouse.Models\Warehouse.Models.csproj" />
     <ProjectReference Include="..\Warehouse.DAO\Warehouse.DAO.csproj" />
+    <ProjectReference Include="..\Warehouse.Controller\Warehouse.Controller.csproj" />
   </ItemGroup>
 
 <ItemGroup>
