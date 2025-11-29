@@ -18,7 +18,6 @@ public class ItemController : IController
     /// <summary>
     /// Creates a new Controller with injected service factory
     /// </summary>
-    /// <param name="serviceFactory">Service factory to use for command creation</param>
     public ItemController(IServiceFactory serviceFactory)
     {
         this.serviceFactory = serviceFactory ?? ServiceFactory.Instance;
@@ -27,8 +26,6 @@ public class ItemController : IController
     /// <summary>
     /// Executes a request by finding the appropriate command and delegating execution
     /// </summary>
-    /// <param name="request">Request to execute</param>
-    /// <returns>Response from the executed command</returns>
     public Response Execute(Request request)
     {
         var command = CommandProvider.GetCommand(request.Command, serviceFactory);
@@ -38,8 +35,6 @@ public class ItemController : IController
     /// <summary>
     /// Parses user input string and creates a Request object
     /// </summary>
-    /// <param name="input">User input string</param>
-    /// <returns>Parsed Request object</returns>
     public Request GetRequest(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
