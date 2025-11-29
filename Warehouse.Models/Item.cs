@@ -101,6 +101,6 @@ public abstract class Item
     /// <returns>String representation</returns>
     public override string ToString()
     {
-        return $"{GetType().Name}{{name={Name}, size={Size}, gender = {Gender}, price={Price}, quantity={Quantity}}}";
+        return $"{GetType().Name} - {{name={Name}, size={Size}, gender = {Gender}, price={Price}, quantity={Quantity}}}";
     }
 }

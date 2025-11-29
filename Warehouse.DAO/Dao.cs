@@ -40,6 +40,7 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     private IEnumerable<T> EnumerateAll()
     {
         var path = GetPath();
+        // I'm using 'using' here to ensure the StreamReader is disposed properly
         using var sr = new StreamReader(path);
         string line;
         bool first = true;

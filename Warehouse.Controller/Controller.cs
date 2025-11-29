@@ -39,16 +39,16 @@ public class ItemController : IController
     {
         if (string.IsNullOrWhiteSpace(input))
         {
-            return new Request("", "", []);
+            return new Request("", []);
         }
 
         var parts = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var parameters = new string[parts.Length - 2];
-        for (int i = 2; i < parts.Length; i++)
+        var parameters = new string[parts.Length - 1];
+        for (int i = 1; i < parts.Length; i++)
         {
-            parameters[i - 2] = parts[i];
+            parameters[i - 1] = parts[i];
         }
 
-        return new Request(parts[0], parts[1], parameters);
+        return new Request(parts[0], parameters);
     }
 }

@@ -18,7 +18,6 @@ public class FindCommand : ICommand
     /// <summary>
     /// Creates a new FindCommand with injected service factory
     /// </summary>
-    /// <param name="serviceFactory">Service factory to use</param>
     public FindCommand(IServiceFactory serviceFactory)
     {
         service = (serviceFactory ?? ServiceFactory.Instance).CreateService();
@@ -27,7 +26,6 @@ public class FindCommand : ICommand
     /// <summary>
     /// Creates a new FindCommand with injected service
     /// </summary>
-    /// <param name="service">Item service to use</param>
     public FindCommand(IItemService service)
     {
         this.service = service ?? throw new ArgumentNullException(nameof(service));
@@ -36,26 +34,24 @@ public class FindCommand : ICommand
     /// <summary>
     /// Executes the find command to retrieve items based on parameters
     /// </summary>
-    /// <param name="request">Request containing command parameters</param>
-    /// <returns>Response containing found items</returns>
     public Response Execute(Request request)
     {
         try
         {
-            var target = request.Target.ToLower();
+            var target = GetTarget(request.Parameters);
             if (request.Parameters.Length == 0)
             {
-                if (target == "all")
+                if (target.StartsWith("all"))
                 {
                     var res = service.FindAllItems();
                     return new Response(true, "all without predicate", res);
                 }
-                else if (target == "clothing")
+                else if (target.StartsWith("cloth"))
                 {
                     var res = service.FindAll<Clothing>();
                     return new Response(true, "clothing without predicate", res);
                 }
-                else if (target == "footwear")
+                else if (target.StartsWith("foot"))
                 {
                     var res = service.FindAll<Footwear>();
                     return new Response(true, "footwear without predicate", res);
@@ -63,20 +59,20 @@ public class FindCommand : ICommand
 
             }
 
-            if (target == "all")
+            if (target.StartsWith("all"))
             {
                 var predicate = GetItemsPredicate(request.Parameters);
                 service.FindAllItems();
                 var res = service.FilterAllBy(predicate);
                 return new Response(true, "all with parameters", res);
             }
-            else if (target == "clothing")
+            else if (target.StartsWith("cloth"))
             {
                 var predicate = GetClothingPredicate(request.Parameters);
                 var res = service.FilterBy(predicate);
                 return new Response(true, "clothing with parameters", res);
             }
-            else if (target == "footwear")
+            else if (target.StartsWith("foot"))
             {
                 var predicate = GetFootwearPredicate(request.Parameters);
                 var res = service.FilterBy(predicate);
@@ -97,6 +93,17 @@ public class FindCommand : ICommand
         }
     }
 
+
+    /// <summary>
+    /// Extracts the target type from parameters
+    /// </summary>
+    private static string GetTarget(string[] parameters)
+    {
+        if (parameters.Length == 0)
+            return "";
+
+        return parameters[0].ToLower();
+    }
     /// <summary>
     /// Builds a predicate for filtering items based on parameters
     /// </summary>
@@ -196,9 +203,6 @@ public class FindCommand : ICommand
     /// <summary>
     /// Parses price range from string filter
     /// </summary>
-    /// <param name="priceFilter">Price filter string in format "min;max"</param>
-    /// <returns>Price range</returns>
-    /// <exception cref="ArgumentException">When price filter format is invalid</exception>
     private Range<decimal> ParsePriceRange(string priceFilter)
     {
         if (priceFilter.StartsWith("price="))

@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,14 +26,14 @@
     <ProjectReference Include="..\Warehouse.Models\Warehouse.Models.csproj" />
     <ProjectReference Include="..\Warehouse.DAO\Warehouse.DAO.csproj" />
     <ProjectReference Include="..\Warehouse.Controller\Warehouse.Controller.csproj" />
-    <ProjectReference Include="..\Warehouse.Presentation\Presentation.csproj" />
+    <ProjectReference Include="..\Warehouse.Presentation\Warehouse.Presentation.csproj" />
   </ItemGroup>
 
-<ItemGroup>
-  <None Include="..\..\Data\**\*">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
-  </None>
-</ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Data\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
 
 </Project>

@@ -29,7 +29,6 @@ public class ViewFactory : IViewFactory
     /// <summary>
     /// Creates a view instance
     /// </summary>
-    /// <returns>Configured view instance or default ConsoleView with controller factory if none configured</returns>
     public IView CreateView()
     {
         return view ?? new ConsoleView(ControllerFactory.Instance);

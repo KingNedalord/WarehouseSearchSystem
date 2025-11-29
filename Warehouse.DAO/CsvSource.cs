@@ -7,7 +7,7 @@ namespace Warehouse.DAO;
 /// Abstract base class for CSV-based data sources in Straight implementation
 /// </summary>
 /// <typeparam name="T">Type of Item to load from CSV</typeparam>
-public abstract class AbstractCsvSource<T> : ISource<T>, ICloneable where T : Item
+public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
 {
     /// <summary>
     /// Name of the CSV file
@@ -30,6 +30,9 @@ public abstract class AbstractCsvSource<T> : ISource<T>, ICloneable where T : It
     public string FilePath() => filePath;
 
 
+    /// <summary>
+    /// Splits a CSV line into fields, handling simple cases without quotes
+    /// </summary
     protected static string[] SplitCsvLine(string line)
     {
         if (string.IsNullOrEmpty(line)) return Array.Empty<string>();
@@ -59,48 +62,6 @@ public abstract class AbstractCsvSource<T> : ISource<T>, ICloneable where T : It
     /// <returns>Parsed Item object</returns>
     public abstract T Parse(string line);
 
-    /// <summary>
-    /// Creates a shallow clone of this source. Default implementation will try to
-    /// create a new instance of the same runtime type using the string filePath constructor.
-    /// </summary>
-    public object Clone()
-    {
-        var type = this.GetType();
-        try
-        {
-            // Try to find a constructor that accepts a single string (file path)
-            var ctor = type.GetConstructor(new[] { typeof(string) });
-            if (ctor != null)
-            {
-                return ctor.Invoke(new object[] { this.filePath })!;
-            }
-
-            // Fallback: try to create instance with parameterless ctor and copy field via reflection
-            var instance = Activator.CreateInstance(type);
-            if (instance == null) throw new InvalidOperationException($"Cannot clone source of type {type.FullName}");
-
-            // Try to set a 'filePath' or 'FilePath' field/property if present
-            var fi = type.GetField("filePath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (fi != null)
-            {
-                fi.SetValue(instance, this.filePath);
-                return instance;
-            }
-
-            var pi = type.GetProperty("FilePath", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            if (pi != null && pi.CanWrite)
-            {
-                pi.SetValue(instance, this.filePath);
-                return instance;
-            }
-
-            return instance;
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Failed to clone source of type {type.FullName}", ex);
-        }
-    }
 }
 
 

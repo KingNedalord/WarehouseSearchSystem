@@ -32,8 +32,6 @@ public interface IController
     /// <summary>
     /// Executes a request and returns a response
     /// </summary>
-    /// <param name="request">Request to execute</param>
-    /// <returns>Response containing execution result</returns>
     Response Execute(Request request);
 }
 
@@ -45,7 +43,5 @@ public interface ICommand
     /// <summary>
     /// Executes the command with the specified request
     /// </summary>
-    /// <param name="request">Request containing command parameters</param>
-    /// <returns>Response containing execution result</returns>
     Response Execute(Request request);
 }

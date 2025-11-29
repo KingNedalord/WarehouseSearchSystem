@@ -24,8 +24,6 @@ public class ItemDaoFactory : IItemDaoFactory
     /// <summary>
     /// Configures a DAO for a specific Item type.
     /// </summary>
-    /// <typeparam name="T">Type of Item</typeparam>
-    /// <param name="dao">DAO instance to configure</param>
     public void ConfigureItemDao<T>(IItemDao<T> dao) where T : Item
     {
         configuredDaos[typeof(T)] = dao;
@@ -34,8 +32,6 @@ public class ItemDaoFactory : IItemDaoFactory
     /// <summary>
     /// Configures a data source for a specific Item type.
     /// </summary>
-    /// <typeparam name="T">Type of Item</typeparam>
-    /// <param name="source">Data source instance to configure</param>
     public void ConfigureSource<T>(ISource<T> source) where T : Item
     {
         configuredSources[typeof(T)] = source;
@@ -44,8 +40,6 @@ public class ItemDaoFactory : IItemDaoFactory
     /// <summary>
     /// Creates a DAO for a specific Item type.
     /// </summary>
-    /// <typeparam name="T">Type of Item</typeparam>
-    /// <returns>DAO instance for the specified type</returns>
     public IItemDao<T> CreateItemDao<T>() where T : Item
     {
         if (configuredDaos.TryGetValue(typeof(T), out var dao))
@@ -64,6 +58,6 @@ public class ItemDaoFactory : IItemDaoFactory
 
         var source = (ISource<T>)stored;
         // return a clone so caller can't mutate the stored prototype
-        return source.TypedCloneSource();
+        return source;
     }
 }
