@@ -8,8 +8,8 @@ public class Program
         var baseDir = AppDomain.CurrentDomain.BaseDirectory;
 
         // Use relative paths that match the repository layout when running from the project's output folder
-        var clothingCsv = Path.Combine(baseDir, "..", "..", "..", "Data", "clothing.csv");
-        var footwearCsv = Path.Combine(baseDir, "..", "..", "..", "Data", "footwear.csv");
+        var clothingCsv = Path.Combine(baseDir, "..", "..", "..", "..", "Data", "clothing.csv");
+        var footwearCsv = Path.Combine(baseDir, "..", "..", "..", "..", "Data", "footwear.csv");
 
         try
         {
