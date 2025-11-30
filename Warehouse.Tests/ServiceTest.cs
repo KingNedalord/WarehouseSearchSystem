@@ -1,11 +1,8 @@
-using System;
-using System.IO;
 using Warehouse.DAO;
 using Warehouse.Models;
 using Warehouse.Services;
-using Xunit;
 
-namespace Warehouse.Tests.Integration;
+namespace Warehouse.Tests;
 
 /// <summary>
 /// Builder for creating services that read from actual CSV files
@@ -119,7 +116,7 @@ public class ServiceTest
     public void FindFootwear_SpecificItems_ShouldExist()
     {
         // Act
-        var footwear = _service.FilterBy<Clothing>(c => c.ClothingType == ClothingType.Fullbody).ToList();
+        var footwear = _service.FilterBy<Clothing>(c => c.ClothingType == ClothingType.Fullbody);
 
         // Assert - Check for specific items from the CSV
         Assert.NotEmpty(footwear);
@@ -141,7 +138,7 @@ public class ServiceTest
     public void FindBySize_Medium_ShouldReturnMultipleItems()
     {
         // Act
-        var products = _service.FilterAllBy(i => i.Size == Size.M).ToList();
+        var products = _service.FilterAllBy(i => i.Size == Size.M);
 
         // Assert
         Assert.NotEmpty(products);

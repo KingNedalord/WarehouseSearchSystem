@@ -1,9 +1,8 @@
 using Warehouse.Controller;
 using Warehouse.Models;
 using Warehouse.Presentation;
-using Xunit;
 
-namespace Warehouse.Tests.Integration;
+namespace Warehouse.Tests;
 
 /// <summary>
 /// Integration tests for ConsoleView presentation layer
@@ -33,7 +32,7 @@ public class ConsoleViewTests
         }
 
         // Helper to return concrete type when needed by tests (may be null if not applicable)
-        public ItemController CreateController() => _controller as ItemController;
+        public ItemController? CreateController() => _controller as ItemController;
 
         IController IControllerFactory.CreateController()
         {
@@ -57,13 +56,13 @@ public class ConsoleViewTests
             // Parse input to create request
             var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 0)
-                return new Request("", null);
+                return new Request("", "", null);
 
             var action = parts[0];
             var target = parts.Length > 1 ? parts[1] : "";
             var parameters = parts.Length > 2 ? parts[2..] : null;
 
-            return new Request(action, parameters);
+            return new Request(action, target, parameters);
         }
 
         public Response Execute(Request request)
