@@ -38,7 +38,8 @@ public class FindCommand : ICommand
     {
         try
         {
-            var target = GetTarget(request.Parameters);
+            // var target = GetTarget(request.Parameters);
+            var target = request.Target.ToLower();
             if (request.Parameters.Length == 0)
             {
                 if (target.StartsWith("all"))

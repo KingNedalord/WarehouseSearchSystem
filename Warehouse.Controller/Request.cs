@@ -10,6 +10,10 @@ public class Request
     public string Command { get; }
 
     /// <summary>
+    /// Gets the target name to execute
+    /// </summary>
+    public string Target { get; }
+    /// <summary>
     /// Gets the parameters for the command
     /// </summary>
     public string[] Parameters { get; }
@@ -19,9 +23,10 @@ public class Request
     /// </summary>
     /// <param name="command">Command name to execute</param>
     /// <param name="parameters">Optional parameters for the command</param>
-    public Request(string command, string[]? parameters = null)
+    public Request(string command, string target, string[]? parameters = null)
     {
         Command = command;
+        Target = target;
         Parameters = parameters ?? [];
     }
 }

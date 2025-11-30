@@ -39,9 +39,13 @@ public class ItemController : IController
     {
         if (string.IsNullOrWhiteSpace(input))
         {
-            return new Request("", []);
+            return new Request("", "", []);
         }
 
+        if (input.Contains("exit", StringComparison.CurrentCultureIgnoreCase))
+        {
+            return new Request("Exit", "", []);
+        }
         var parts = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var parameters = new string[parts.Length - 1];
         for (int i = 1; i < parts.Length; i++)
@@ -49,6 +53,6 @@ public class ItemController : IController
             parameters[i - 1] = parts[i];
         }
 
-        return new Request(parts[0], parameters);
+        return new Request(parts[0], parts[1], parameters);
     }
 }
