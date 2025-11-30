@@ -22,18 +22,18 @@ public class ConsoleView : IView
     {
         var controller = controllerFactory.CreateController();
 
-        Console.WriteLine("Welcome to the Item Management System!");
-        Console.WriteLine("Available commands:");
-        Console.WriteLine("  find clothing - find all clothing");
-        Console.WriteLine("  find footwear - find all footwear");
-        Console.WriteLine("  find all - find all items");
-        Console.WriteLine("  find all price=min;max - find items by price range");
-        Console.WriteLine("  exit - exit the application");
+        ColorConsole.WriteInfo("Welcome to the Item Management System!");
+        ColorConsole.WriteInfo("Available commands:");
+        ColorConsole.WriteInfo("  find clothing - find all clothing");
+        ColorConsole.WriteInfo("  find footwear - find all footwear");
+        ColorConsole.WriteInfo("  find all - find all items");
+        ColorConsole.WriteInfo("  find all price=min;max - find items by price range");
+        ColorConsole.WriteInfo("  exit - exit the application");
         Console.WriteLine();
 
         while (true)
         {
-            Console.Write("Enter command: ");
+            ColorConsole.WriteInfo("Enter command: ");
             var input = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrEmpty(input))
@@ -47,20 +47,20 @@ public class ConsoleView : IView
 
             if (response.Success)
             {
-                Console.WriteLine(response.Message);
+                ColorConsole.WriteSuccess(response.Message);
                 foreach (var item in response.Items)
                 {
-                    Console.WriteLine($"  {item}");
+                    ColorConsole.WriteSuccess($"  {item}");
                 }
             }
             else
             {
-                Console.WriteLine($"Error: {response.Message}");
+                ColorConsole.WriteError($"Error: {response.Message}");
             }
             Console.WriteLine();
         }
 
-        Console.WriteLine("Goodbye!");
+        ColorConsole.WriteWarning("Goodbye!");
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public class ConsoleView : IView
     /// </summary>
     public void Crash()
     {
-        Console.WriteLine("Critical error occurred in the application!");
-        Console.WriteLine("Please check the configuration and try again.");
+        ColorConsole.WriteError("Critical error occurred in the application!");
+        ColorConsole.WriteError("Please check the configuration and try again.");
     }
 }

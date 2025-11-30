@@ -47,6 +47,10 @@ public class ItemController : IController
             return new Request("Exit", "", []);
         }
         var parts = input.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 2)
+        {
+            return new Request("", "", []);
+        }
         var parameters = new string[parts.Length - 1];
         for (int i = 1; i < parts.Length; i++)
         {
