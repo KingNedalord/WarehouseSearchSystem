@@ -1,15 +1,11 @@
 ﻿using Warehouse.Models;
 namespace Warehouse.Services;
+
 /// <summary>
 /// Interface for Item service operations
 /// </summary>
 public interface IItemService
 {
-    /// <summary>
-    /// Finds all available Items(Clothings/Footwears)
-    /// </summary>
-    public List<T> FindAll<T>() where T : Item;
-
     /// <summary>
     /// Finds all available Items
     /// </summary

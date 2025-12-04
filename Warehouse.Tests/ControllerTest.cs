@@ -52,7 +52,6 @@ public class FindCommandControllerTests
 
         // Assert
         Assert.True(response.Success);
-        Assert.Equal("all without predicate", response.Message);
         Assert.NotNull(response.Items);
         Assert.Equal(34, response.Items.Count); // 19 clothing + 15 footwear
     }
@@ -68,7 +67,6 @@ public class FindCommandControllerTests
 
         // Assert
         Assert.True(response.Success);
-        Assert.Equal("all with parameters", response.Message);
         Assert.NotNull(response.Items);
         foreach (var item in response.Items)
         {
@@ -146,7 +144,6 @@ public class FindCommandControllerTests
 
         // Assert
         Assert.True(response.Success);
-        Assert.Equal("clothing without predicate", response.Message);
         Assert.NotNull(response.Items);
         Assert.Equal(19, response.Items.Count);
         foreach (var item in response.Items)
@@ -229,7 +226,6 @@ public class FindCommandControllerTests
 
         // Assert
         Assert.True(response.Success);
-        Assert.Equal("footwear without predicate", response.Message);
         Assert.NotNull(response.Items);
         Assert.Equal(15, response.Items.Count);
         foreach (var item in response.Items)

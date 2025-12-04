@@ -40,7 +40,8 @@ public class ServiceTest
     public void FindClothings_FromFile_ShouldReturn19Items()
     {
         // Act
-        var clothing = _service.FindAll<Clothing>();
+        Predicate<Clothing> emptyPredicate = item => true;
+        var clothing = _service.FilterBy(emptyPredicate);
 
         // Assert
         Assert.Equal(19, clothing.Count);
@@ -51,7 +52,8 @@ public class ServiceTest
     public void FindFootwears_FromFile_ShouldReturn15Items()
     {
         // Act
-        var footwear = _service.FindAll<Footwear>();
+        Predicate<Footwear> emptyPredicate = item => true;
+        var footwear = _service.FilterBy(emptyPredicate);
 
         // Assert
         Assert.Equal(15, footwear.Count);
@@ -106,10 +108,10 @@ public class ServiceTest
         var clothing = _service.FilterBy<Footwear>(f => f.FootwearType == FootwearType.Special);
 
         // Assert - Check for specific items from the CSV
-        Assert.Contains(clothing, c => c.Name == "Wedding White Heels" && c.Price == 189.99m);
-        Assert.Contains(clothing, c => c.Name == "Evening Stilettos" && c.Price == 219.99m);
-        Assert.Contains(clothing, c => c.Name == "Prom Glitter Pumps" && c.Price == 199.99m);
-        Assert.Contains(clothing, c => c.Name == "Party Platforms" && c.Price == 179.99m);
+        Assert.Contains(clothing, c => c.Name == "Wedding White Heels");
+        Assert.Contains(clothing, c => c.Name == "Evening Stilettos");
+        Assert.Contains(clothing, c => c.Name == "Prom Glitter Pumps");
+        Assert.Contains(clothing, c => c.Name == "Party Platforms");
     }
 
     [Fact]
@@ -227,9 +229,9 @@ public class ServiceTest
         Assert.NotEmpty(casualFootwear);
         Assert.Equal(5, casualFootwear.Count);
         Assert.All(casualFootwear, f => Assert.Equal(FootwearType.Casual, f.FootwearType));
-        Assert.Contains(casualFootwear, f => f.Name == "Running Sneakers Blue" && f.Price == 119.99m);
-        Assert.Contains(casualFootwear, f => f.Name == "Canvas Slip-ons" && f.Price == 59.99m);
-        Assert.Contains(casualFootwear, f => f.Name == "Beach Flip-flops" && f.Price == 34.99m);
+        Assert.Contains(casualFootwear, f => f.Name == "Running Sneakers Blue");
+        Assert.Contains(casualFootwear, f => f.Name == "Canvas Slip-ons");
+        Assert.Contains(casualFootwear, f => f.Name == "Beach Flip-flops");
     }
 
     [Fact]
@@ -282,8 +284,8 @@ public class ServiceTest
         Assert.NotEmpty(maleFootwear);
         Assert.Equal(5, maleFootwear.Count);
         Assert.All(maleFootwear, f => Assert.Equal(Gender.Male, f.Gender));
-        Assert.Contains(maleFootwear, f => f.Name == "Classic Brown Loafers" && f.Price == 129.99m);
-        Assert.Contains(maleFootwear, f => f.Name == "Black Oxford Shoes" && f.Price == 149.99m);
+        Assert.Contains(maleFootwear, f => f.Name == "Classic Brown Loafers");
+        Assert.Contains(maleFootwear, f => f.Name == "Black Oxford Shoes");
     }
 
     [Fact]

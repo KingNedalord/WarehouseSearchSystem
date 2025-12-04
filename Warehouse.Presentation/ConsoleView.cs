@@ -1,5 +1,6 @@
 using Warehouse.Controller;
 namespace Warehouse.Presentation;
+
 /// <summary>
 /// Console-based view implementation that provides command-line interface for item management
 /// </summary>
@@ -47,7 +48,7 @@ public class ConsoleView : IView
 
             if (response.Success)
             {
-                ColorConsole.WriteSuccess(response.Message);
+                ColorConsole.WriteInfo(response.Message);
                 foreach (var item in response.Items)
                 {
                     ColorConsole.WriteSuccess($"  {item}");

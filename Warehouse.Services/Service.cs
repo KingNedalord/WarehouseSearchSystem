@@ -19,22 +19,6 @@ public class ItemService : IItemService
     }
 
     /// <summary>
-    /// Finds all available Footwears
-    /// </summary>
-    public List<T> FindAll<T>() where T : Item
-    {
-        try
-        {
-            var itemDao = ItemDaoFactory.CreateItemDao<T>();
-            return [.. itemDao.FindAll()];
-        }
-        catch (DaoException ex)
-        {
-            throw new ServiceException("Error searching for Footwears", ex);
-        }
-    }
-
-    /// <summary>
     /// Finds all available Items
     /// </summary>
     public List<Item> FindAllItems()
@@ -85,6 +69,4 @@ public class ItemService : IItemService
             throw new ServiceException($"Error searching for {typeof(Item).Name}", ex);
         }
     }
-
-
 }
