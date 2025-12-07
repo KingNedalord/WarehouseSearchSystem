@@ -23,18 +23,20 @@ public class ConsoleView : IView
     {
         var controller = controllerFactory.CreateController();
 
-        ColorConsole.WriteInfo("Welcome to the Item Management System!");
-        ColorConsole.WriteInfo("Available commands:");
-        ColorConsole.WriteInfo("  find clothing - find all clothing");
-        ColorConsole.WriteInfo("  find footwear - find all footwear");
-        ColorConsole.WriteInfo("  find all - find all items");
-        ColorConsole.WriteInfo("  find all price=min;max - find items by price range");
-        ColorConsole.WriteInfo("  exit - exit the application");
+        Console.Clear();
+        AnimatedLoading.TypewriterWelcome("Welcome to the Item Management System!");
+        ColorConsole.WriteLineInfo("Available commands:");
+        ColorConsole.WriteLineInfo("  find clothing - find all clothing");
+        ColorConsole.WriteLineInfo("  find footwear - find all footwear");
+        ColorConsole.WriteLineInfo("  find all - find all items");
+        ColorConsole.WriteLineInfo("  find all price=min;max - find items by price range");
+        ColorConsole.WriteLineInfo("  exit - exit the application");
         Console.WriteLine();
+
 
         while (true)
         {
-            ColorConsole.WriteInfo("Enter command: ");
+            ColorConsole.WriteLineInfo("Enter command: ");
             var input = Console.ReadLine()?.Trim();
 
             if (string.IsNullOrEmpty(input))
@@ -43,12 +45,14 @@ public class ConsoleView : IView
             var request = controller.GetRequest(input);
             var response = controller.Execute(request);
 
+
             if (response.IsExit)
                 break;
 
             if (response.Success)
             {
-                ColorConsole.WriteInfo(response.Message);
+                AnimatedLoading.Loading();
+                ColorConsole.WriteLineInfo(response.Message);
                 foreach (var item in response.Items)
                 {
                     ColorConsole.WriteSuccess($"  {item}");
