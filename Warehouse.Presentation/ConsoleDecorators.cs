@@ -46,7 +46,11 @@ static class AnimatedLoading
 {
     public static void Loading()
     {
-        string[] frames = {
+        if (IsConsoleAvailable())
+        {
+
+
+            string[] frames = {
     @"
     O
    /|\
@@ -59,34 +63,57 @@ static class AnimatedLoading
     "
 };
 
-        // Randomly get a seconds
-        int[] numbers = { 1, 1, 2 };
-        Random random = new();
-        int seconds = numbers[random.Next(numbers.Length)];
+            // Randomly get a seconds
+            int[] numbers = { 1, 1, 2 };
+            Random random = new();
+            int seconds = numbers[random.Next(numbers.Length)];
 
-        Stopwatch stopwatch = Stopwatch.StartNew();
-        while (stopwatch.Elapsed.TotalSeconds < seconds)
-        {
-            foreach (var frame in frames)
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            while (stopwatch.Elapsed.TotalSeconds < seconds)
             {
-                Console.Clear();
-                Console.WriteLine(frame);
-                Thread.Sleep(300);
+                foreach (var frame in frames)
+                {
+                    Console.Clear();
+                    Console.WriteLine(frame);
+                    Thread.Sleep(300);
 
-                if (stopwatch.Elapsed.TotalSeconds >= seconds)
-                    break;
+                    if (stopwatch.Elapsed.TotalSeconds >= seconds)
+                        break;
+                }
             }
+            stopwatch.Stop();
         }
-        stopwatch.Stop();
     }
 
     public static void TypewriterWelcome(string message)
     {
-        foreach (char c in message)
+        if (IsConsoleAvailable())
         {
-            ColorConsole.WriteInfo(c);
-            Thread.Sleep(50);
+            Console.Clear();
+            foreach (char c in message)
+            {
+                ColorConsole.WriteInfo(c);
+                Thread.Sleep(50);
+            }
+            Console.WriteLine("\n");
         }
-        Console.WriteLine("\n");
+        else
+        {
+            Console.WriteLine(message);
+        }
+    }
+
+    public static bool IsConsoleAvailable()
+    {
+        try
+        {
+            var _ = Console.WindowHeight;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
+

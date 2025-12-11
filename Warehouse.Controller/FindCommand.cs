@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Warehouse.Models;
 using Warehouse.Services;
 namespace Warehouse.Controller;
@@ -105,7 +106,7 @@ public class FindCommand : ICommand
             }
             else if (parameter.StartsWith("gender"))
             {
-                Gender gender = ParsGender(parameter);
+                Gender gender = ParseGender(parameter);
                 predicate.Add(c => c.Gender == gender);
             }
         }
@@ -133,7 +134,7 @@ public class FindCommand : ICommand
             }
             else if (parameter.StartsWith("gender"))
             {
-                Gender gender = ParsGender(parameter);
+                Gender gender = ParseGender(parameter);
                 predicate.Add(c => c.Gender == gender);
             }
             else if (parameter.StartsWith("type"))
@@ -166,7 +167,7 @@ public class FindCommand : ICommand
             }
             else if (parameter.StartsWith("gender"))
             {
-                Gender gender = ParsGender(parameter);
+                Gender gender = ParseGender(parameter);
                 predicate.Add(c => c.Gender == gender);
             }
             else if (parameter.StartsWith("type"))
@@ -179,16 +180,15 @@ public class FindCommand : ICommand
         return predicate.Build();
     }
 
-
-
     /// <summary>
     /// Parses price range from string filter
     /// </summary>
-    private Range<decimal> ParsePriceRange(string priceFilter)
+    private static Range<decimal> ParsePriceRange(string priceFilter)
     {
-        if (priceFilter.StartsWith("price="))
-            priceFilter = priceFilter.Substring(6);
+        if (priceFilter.StartsWith("price"))
+            priceFilter = priceFilter[5..];
 
+        priceFilter = priceFilter.Split('=')[1].Trim();
         var parts = priceFilter.Split(';');
         if (parts.Length != 2)
         {
@@ -216,14 +216,14 @@ public class FindCommand : ICommand
     /// <summary>
     /// Parses size from string filter
     /// </summary>
-    private Size ParseSize(string sizeFilter)
+    private static Size ParseSize(string sizeFilter)
     {
-        if (sizeFilter.StartsWith("size="))
-            sizeFilter = sizeFilter.Substring(5); // Remove "size=" prefix
+        if (sizeFilter.StartsWith("size"))
+            sizeFilter = sizeFilter[4..];
 
-        sizeFilter = sizeFilter.Trim();
+        sizeFilter = sizeFilter.Split('=')[1].Trim();
 
-        if (!Enum.TryParse<Size>(sizeFilter, out var size))
+        if (!Enum.TryParse<Size>(sizeFilter, ignoreCase: true, out var size))
         {
             var validValues = string.Join(", ", Enum.GetNames<Size>());
             throw new ArgumentException($"Invalid size: '{sizeFilter}'. Valid values are: {validValues}");
@@ -235,14 +235,13 @@ public class FindCommand : ICommand
     /// <summary>
     /// Parses gender from string filter
     /// </summary>
-    private Gender ParsGender(string genderFilter)
+    private static Gender ParseGender(string genderFilter)
     {
-        if (genderFilter.StartsWith("gender="))
-            genderFilter = genderFilter.Substring(7);
+        if (genderFilter.StartsWith("gender"))
+            genderFilter = genderFilter[6..];
 
-        genderFilter = genderFilter.Trim();
-
-        if (!Enum.TryParse<Gender>(genderFilter, out var gender))
+        genderFilter = genderFilter.Split('=')[1].Trim();
+        if (!Enum.TryParse<Gender>(genderFilter, ignoreCase: true, out var gender))
         {
             var validValues = string.Join(", ", Enum.GetNames<Gender>());
             throw new ArgumentException($"Invalid gender: '{genderFilter}'. Valid values are: {validValues}");
@@ -254,14 +253,14 @@ public class FindCommand : ICommand
     /// <summary>
     /// Parses clothing type from string filter
     /// </summary>
-    private ClothingType ParseClothingType(string typeFilter)
+    private static ClothingType ParseClothingType(string typeFilter)
     {
-        if (typeFilter.StartsWith("type="))
-            typeFilter = typeFilter.Substring(5);
+        if (typeFilter.StartsWith("type"))
+            typeFilter = typeFilter[4..];
 
-        typeFilter = typeFilter.Trim();
+        typeFilter = typeFilter.Split('=')[1].Trim();
 
-        if (!Enum.TryParse<ClothingType>(typeFilter, out var type))
+        if (!Enum.TryParse<ClothingType>(typeFilter, ignoreCase: true, out var type))
         {
             var validValues = string.Join(", ", Enum.GetNames<ClothingType>());
             throw new ArgumentException($"Invalid type: '{typeFilter}'. Valid values are: {validValues}");
@@ -273,14 +272,14 @@ public class FindCommand : ICommand
     /// <summary>
     /// Parses footwear type from string filter
     /// </summary>
-    private FootwearType ParseFootwearType(string typeFilter)
+    private static FootwearType ParseFootwearType(string typeFilter)
     {
-        if (typeFilter.StartsWith("type="))
-            typeFilter = typeFilter.Substring(5);
+        if (typeFilter.StartsWith("type"))
+            typeFilter = typeFilter[4..];
 
-        typeFilter = typeFilter.Trim();
+        typeFilter = typeFilter.Split('=')[1].Trim();
 
-        if (!Enum.TryParse<FootwearType>(typeFilter, out var type))
+        if (!Enum.TryParse<FootwearType>(typeFilter, ignoreCase: true, out var type))
         {
             var validValues = string.Join(", ", Enum.GetNames<FootwearType>());
             throw new ArgumentException($"Invalid type: '{typeFilter}'. Valid values are: {validValues}");

@@ -9,7 +9,7 @@ namespace Warehouse.Services;
 /// </summary>
 public class ServiceFactory : IServiceFactory
 {
-    private static readonly ServiceFactory instance = new ServiceFactory();
+    private static readonly ServiceFactory instance = new();
     private IItemService? service;
 
     private ServiceFactory() { }

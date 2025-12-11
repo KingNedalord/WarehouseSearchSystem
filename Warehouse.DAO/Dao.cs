@@ -24,8 +24,8 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     /// <returns>List of matching Items</returns>
     public IList<T> Find(Predicate<T> predicate)
     {
-        if (predicate == null) throw new ArgumentNullException(nameof(predicate));
-        return FindAll().Where(i => predicate(i)).ToList();
+        ArgumentNullException.ThrowIfNull(predicate);
+        return [.. FindAll().Where(i => predicate(i))];
     }
 
     /// <summary>
@@ -34,20 +34,19 @@ public class ItemDao<T> : IItemDao<T> where T : Item
     /// <returns>List of all Items</returns>
     public IList<T> FindAll()
     {
-        return EnumerateAll().ToList();
+        return [.. EnumerateAll()];
     }
 
     private IEnumerable<T> EnumerateAll()
     {
         var path = GetPath();
-        // I'm using 'using' here to ensure the StreamReader is disposed properly
+        // 'using' here to ensure the StreamReader is disposed properly
         using var sr = new StreamReader(path);
-        string line;
+        string? line;
         bool first = true;
         int lineNumber = 0;
 
-        // ! after Readline to indicate we know it's not null, like saying "trust me, it's not null"
-        while ((line = sr.ReadLine()!) != null)
+        while ((line = sr.ReadLine()) != null)
         {
             lineNumber++;
             if (first)

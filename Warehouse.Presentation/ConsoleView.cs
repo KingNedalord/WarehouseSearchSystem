@@ -23,7 +23,6 @@ public class ConsoleView : IView
     {
         var controller = controllerFactory.CreateController();
 
-        Console.Clear();
         AnimatedLoading.TypewriterWelcome("Welcome to the Item Management System!");
         ColorConsole.WriteLineInfo("Available commands:");
         ColorConsole.WriteLineInfo("  find clothing - find all clothing");

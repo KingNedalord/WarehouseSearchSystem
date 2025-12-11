@@ -8,13 +8,13 @@ namespace Warehouse.Tests;
 /// <summary>
 /// Integration tests for FindCommand controller using actual CSV files
 /// </summary>
-public class FindCommandControllerTests
+public class ControllerTests
 {
     private readonly FindCommand _findCommand;
     private readonly ItemController _controller;
     private static readonly string[] parameters = ["gender=Female"];
 
-    public FindCommandControllerTests()
+    public ControllerTests()
     {
         var service = new FileBasedServiceBuilder().Build();
         var serviceFactory = new TestServiceFactory(service);
@@ -418,7 +418,7 @@ public class FindCommandControllerTests
     public void Controller_FindWithParameters_ShouldWorkThroughFullStack()
     {
         // Arrange
-        var request = _controller.GetRequest("find clothing price=20;50 size=M");
+        var request = _controller.GetRequest("find clothing price=20;50, size=M");
 
         // Act
         var response = _controller.Execute(request);
