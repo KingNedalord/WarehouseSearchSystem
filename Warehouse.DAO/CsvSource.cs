@@ -3,36 +3,25 @@ using System.Text;
 using Warehouse.Models;
 
 namespace Warehouse.DAO;
+
 /// <summary>
-/// Abstract base class for CSV-based data sources in Straight implementation
+/// Generic CSV source for Clothing and Footwear (and similar items)
 /// </summary>
-/// <typeparam name="T">Type of Item to load from CSV</typeparam>
-public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
+/// <typeparam name="TItem">The item type (e.g., Clothing, Footwear)</typeparam>
+/// <typeparam name="TEnum">The specific enum type for the item category (e.g., ClothingType, FootwearType)</typeparam>
+public abstract class GenericCsvSource<TItem, TEnum> : ISource<TItem>
+    where TItem : Item
+    where TEnum : struct, Enum
 {
-    /// <summary>
-    /// Name of the CSV file
-    /// </summary>
     private readonly string filePath;
 
-    /// <summary>
-    /// Creates a new CSV source with the specified file name
-    /// </summary>
-    /// <param name="filePath">Path to the CSV file</param>
-    protected AbstractCsvSource(string filePath)
+    protected GenericCsvSource(string filePath)
     {
         this.filePath = filePath;
     }
 
-    /// <summary>
-    /// Gets the name of the CSV file
-    /// </summary>
-    /// <returns>CSV file name</returns>
     public string FilePath() => filePath;
 
-
-    /// <summary>
-    /// Splits a CSV line into fields, handling simple cases without quotes
-    /// </summary
     protected static string[] SplitCsvLine(string line)
     {
         if (string.IsNullOrEmpty(line)) return Array.Empty<string>();
@@ -56,99 +45,57 @@ public abstract class AbstractCsvSource<T> : ISource<T> where T : Item
     }
 
     /// <summary>
-    /// Parses a CSV line into an Item object
+    /// Parses common fields: Id, Name, Size, Gender, Price, Quantity, and specific enum
     /// </summary>
-    /// <param name="line">CSV line to parse</param>
-    /// <returns>Parsed Item object</returns>
-    public abstract T Parse(string line);
-
-}
-
-
-/// <summary>
-/// CSV data source for Clothings in Straight implementation
-/// </summary>
-public class ClothingCsvSource : AbstractCsvSource<Clothing>
-{
-    /// <summary>
-    /// Creates a new ClothingCsvSource that reads from the specified file
-    /// </summary>
-    /// <param name="clothingCsvPath">Name of the CSV file</param>
-    public ClothingCsvSource(string clothingCsvPath) : base(clothingCsvPath) { }
-
-    /// <summary>
-    /// Parses a CSV line into a Clothing object
-    /// </summary>
-    /// <param name="line">CSV line to parse</param>
-    /// <returns>Parsed Clothing object</returns>
-    public override Clothing Parse(string line)
+    protected (int id, string name, Size size, Gender gender, decimal price, int quantity, TEnum type) ParseCommon(string line)
     {
-        // Id,Name,Size,Gender,Price,Quantity,Type
         var f = SplitCsvLine(line);
-        if (f.Length < 7) throw new FormatException("Invalid clothing CSV line: " + line);
+        if (f.Length < 7) throw new FormatException("Invalid CSV line: " + line);
 
-        if (!int.TryParse(f[0], out var id)) throw new FormatException("Invalid Id: " + f[0]);
+        if (!int.TryParse(f[0], out var id))
+            throw new FormatException("Invalid Id: " + f[0]);
+
         var name = f[1];
-        var sizeText = f[2];
+        var sizeText = f[2].Replace(" ", "");
+        if (!Enum.TryParse<Size>(sizeText, true, out var size))
+            throw new FormatException("Invalid Size: " + f[2]);
 
-        // requires a method in your models: Size.Parse(string) -> Size
-        var size = Enum.Parse<Size>(sizeText.Replace(" ", ""), true); // Convert "One Size" to "OneSize" and parse case-insensitive
-
-        if (!Enum.TryParse<Gender>(f[3], true, out var gender)) throw new FormatException("Invalid Gender: " + f[3]);
+        if (!Enum.TryParse<Gender>(f[3], true, out var gender))
+            throw new FormatException("Invalid Gender: " + f[3]);
 
         if (!decimal.TryParse(f[4], NumberStyles.Number, CultureInfo.InvariantCulture, out var price))
             throw new FormatException("Invalid Price: " + f[4]);
 
-        if (!int.TryParse(f[5], out var qty)) throw new FormatException("Invalid Quantity: " + f[5]);
+        if (!int.TryParse(f[5], out var quantity))
+            throw new FormatException("Invalid Quantity: " + f[5]);
 
-        if (!Enum.TryParse<ClothingType>(f[6], true, out var clothingType))
-            throw new FormatException("Invalid Clothing Type: " + f[6]);
+        if (!Enum.TryParse<TEnum>(f[6], true, out var type))
+            throw new FormatException($"Invalid Type: {f[6]}");
 
-        return new Clothing(id, name, size, gender, price, qty, clothingType);
+        return (id, name, size, gender, price, quantity, type);
+    }
+
+    public abstract TItem Parse(string line);
+}
+
+public class ClothingCsvSource : GenericCsvSource<Clothing, ClothingType>
+{
+    public ClothingCsvSource(string filePath) : base(filePath) { }
+
+    public override Clothing Parse(string line)
+    {
+        var (id, name, size, gender, price, quantity, type) = ParseCommon(line);
+        return new Clothing(id, name, size, gender, price, quantity, type);
     }
 }
 
-
-/// <summary>
-/// CSV data source for loading Footwear data from Footwears.csv file
-/// </summary>
-public class FootwearCsvSource : AbstractCsvSource<Footwear>
+public class FootwearCsvSource : GenericCsvSource<Footwear, FootwearType>
 {
-    /// <summary>
-    /// Creates a new FootwearCsvSource that reads from the specified file
-    /// </summary>
-    /// <param name="footwearCsvPath">Path to the CSV file</param>
-    public FootwearCsvSource(string footwearCsvPath) : base(footwearCsvPath) { }
+    public FootwearCsvSource(string filePath) : base(filePath) { }
 
-    /// <summary>
-    /// Parses CSV line into Footwear object
-    /// </summary>
-    /// <param name="line">CSV line to parse</param>
-    /// <returns>Parsed Footwear object</returns>
-    /// <exception cref="ArgumentException">When line format is invalid</exception>
     public override Footwear Parse(string line)
     {
-        // Id,Name,Size,Gender,Price,Quantity,Type
-        var f = SplitCsvLine(line);
-        if (f.Length < 7) throw new FormatException("Invalid clothing CSV line: " + line);
-
-        if (!int.TryParse(f[0], out var id)) throw new FormatException("Invalid Id: " + f[0]);
-        var name = f[1];
-        var sizeText = f[2];
-
-        // requires a method in your models: Size.Parse(string) -> Size
-        var size = Enum.Parse<Size>(sizeText.Replace(" ", ""), true); // Convert "One Size" to "OneSize" and parse case-insensitive
-
-        if (!Enum.TryParse<Gender>(f[3], true, out var gender)) throw new FormatException("Invalid Gender: " + f[3]);
-
-        if (!decimal.TryParse(f[4], NumberStyles.Number, CultureInfo.InvariantCulture, out var price))
-            throw new FormatException("Invalid Price: " + f[4]);
-
-        if (!int.TryParse(f[5], out var qty)) throw new FormatException("Invalid Quantity: " + f[5]);
-
-        if (!Enum.TryParse<FootwearType>(f[6], true, out var footwearType))
-            throw new FormatException("Invalid Clothing Type: " + f[6]);
-
-        return new Footwear(id, name, size, gender, price, qty, footwearType);
+        var (id, name, size, gender, price, quantity, type) = ParseCommon(line);
+        return new Footwear(id, name, size, gender, price, quantity, type);
     }
 }
