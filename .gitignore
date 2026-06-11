@@ -11,6 +11,8 @@ nupkg/
 # Rider
 .idea
 
+Main/appsettings.json
+
 # User-specific files
 *.suo
 *.user

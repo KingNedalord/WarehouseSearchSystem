@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  warehouse-search-app:
+    container_name: warehouse_search_console
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Включаем интерактивный режим для работы консоли (ReadLine / WriteLine)
+    stdin_open: true
+    tty: true
+    environment:
+      - sqlConnectionString=Host=host.docker.internal;Database=warehouse;Username=postgres;Password=2369
